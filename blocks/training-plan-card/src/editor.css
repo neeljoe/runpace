@@ -1,0 +1,47 @@
+/**
+ * RunPace – Training Plan Card Block
+ * Editor-only styles.
+ */
+
+/* ── Editor wrapper ────────────────────────────────────────────────────────── */
+.runpace-training-plan-card--editor {
+	min-height: 120px;
+}
+
+/* ── Placeholder chip row ──────────────────────────────────────────────────── */
+.runpace-meta-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.3em 0.75em;
+	background: var(--wp--preset--color--primary-light, #d4f7e7);
+	color: var(--wp--preset--color--primary-dark, #07a85c);
+	border-radius: 9999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	line-height: 1.4;
+}
+
+/* ── Block notice ──────────────────────────────────────────────────────────── */
+.runpace-block-notice {
+	padding: 12px 16px;
+	border-left: 3px solid var(--wp--preset--color--accent, #ff5c1a);
+	background: var(--wp--preset--color--accent-light, #ffe6da);
+	border-radius: 0 6px 6px 0;
+	font-size: 13px;
+	color: var(--wp--preset--color--ink-secondary, #3d3d3a);
+	margin: 0;
+}
+
+/* ── Colour scheme preview tints in editor ─────────────────────────────────── */
+.runpace-training-plan-card--dark.runpace-training-plan-card--editor {
+	background: var(--wp--preset--color--dark-surface, #1a1d1b);
+	color: #fff;
+	border-color: var(--wp--preset--color--dark-border, #2c302d);
+}
+
+.runpace-training-plan-card--accent.runpace-training-plan-card--editor {
+	background: var(--wp--preset--color--primary-light, #d4f7e7);
+	border-color: var(--wp--preset--color--primary, #0bda7a);
+}

@@ -1,0 +1,206 @@
+/**
+ * RunPace – Marathon Info Block
+ * Front-end + Editor styles.
+ *
+ * Uses CSS custom properties from theme.json so no hardcoded values leak in.
+ * BEM naming: .runpace-marathon-info__[element]--[modifier]
+ */
+
+/* ── Base wrapper ──────────────────────────────────────────────────────────── */
+.runpace-marathon-info {
+	position: relative;
+	background: var(--wp--preset--color--surface);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--lg);
+	padding: var(--wp--preset--spacing--6);
+	font-family: var(--wp--preset--font-family--sans);
+}
+
+/* ── Badge (past / soon) ───────────────────────────────────────────────────── */
+.runpace-marathon-info__badge {
+	display: inline-flex;
+	align-items: center;
+	margin-bottom: var(--wp--preset--spacing--4);
+	padding: 0.25em 0.85em;
+	border-radius: var(--wp--custom--radius--pill);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.runpace-marathon-info__badge--past {
+	background: var(--wp--preset--color--border);
+	color: var(--wp--preset--color--ink-muted);
+}
+
+.runpace-marathon-info__badge--soon {
+	background: var(--wp--preset--color--accent-light);
+	color: var(--wp--preset--color--accent);
+}
+
+/* ── Data grid ─────────────────────────────────────────────────────────────── */
+.runpace-marathon-info__grid {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 160px, 1fr ) );
+	gap: var(--wp--preset--spacing--4) var(--wp--preset--spacing--5);
+	margin: 0 0 var(--wp--preset--spacing--5);
+}
+
+/* Card layout is the default grid above ↑ */
+
+/* Inline: single row, no wrapping until mobile */
+.runpace-marathon-info--inline .runpace-marathon-info__grid {
+	grid-template-columns: repeat( auto-fill, minmax( 120px, 1fr ) );
+	gap: var(--wp--preset--spacing--3) var(--wp--preset--spacing--4);
+}
+
+/* Compact: tighter spacing, smaller text */
+.runpace-marathon-info--compact .runpace-marathon-info__grid {
+	grid-template-columns: repeat( auto-fill, minmax( 100px, 1fr ) );
+	gap: var(--wp--preset--spacing--2) var(--wp--preset--spacing--3);
+}
+
+.runpace-marathon-info--compact {
+	padding: var(--wp--preset--spacing--4);
+}
+
+/* ── Individual item ───────────────────────────────────────────────────────── */
+.runpace-marathon-info__item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+}
+
+.runpace-marathon-info__label {
+	display: flex;
+	align-items: center;
+	gap: 0.35em;
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 600;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--ink-muted);
+	margin: 0;
+}
+
+.runpace-marathon-info__value {
+	font-size: var(--wp--preset--font-size--md);
+	font-weight: 500;
+	color: var(--wp--preset--color--ink);
+	margin: 0;
+}
+
+.runpace-marathon-info__value--distance {
+	font-family: var(--wp--preset--font-family--display);
+	font-size: var(--wp--preset--font-size--2xl);
+	color: var(--wp--preset--color--primary-dark);
+	line-height: 1;
+}
+
+.runpace-marathon-info__value--price {
+	font-weight: 700;
+	color: var(--wp--preset--color--accent);
+}
+
+/* ── Difficulty stars ──────────────────────────────────────────────────────── */
+.runpace-difficulty {
+	display: inline-flex;
+	gap: 0.1em;
+}
+
+.runpace-star {
+	color: var(--wp--preset--color--border);
+	font-size: 1.1em;
+	line-height: 1;
+}
+
+.runpace-star--filled {
+	color: var(--wp--preset--color--accent);
+}
+
+/* ── CTA button ────────────────────────────────────────────────────────────── */
+.runpace-marathon-info__cta {
+	margin-top: var(--wp--preset--spacing--5);
+}
+
+.runpace-marathon-info__register-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--2);
+	background: var(--wp--preset--color--primary) !important;
+	color: var(--wp--preset--color--ink) !important;
+	padding: var(--wp--preset--spacing--3) var(--wp--preset--spacing--6) !important;
+	border-radius: var(--wp--custom--radius--pill) !important;
+	font-size: var(--wp--preset--font-size--sm) !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.05em !important;
+	text-transform: uppercase !important;
+	text-decoration: none !important;
+	transition: background var(--wp--custom--transition--fast),
+	            transform var(--wp--custom--transition--fast),
+	            box-shadow var(--wp--custom--transition--fast);
+}
+
+.runpace-marathon-info__register-btn:hover,
+.runpace-marathon-info__register-btn:focus-visible {
+	background: var(--wp--preset--color--primary-dark) !important;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 14px rgba(11,218,122,0.35);
+}
+
+.runpace-btn-arrow {
+	transition: transform var(--wp--custom--transition--fast);
+}
+
+.runpace-marathon-info__register-btn:hover .runpace-btn-arrow {
+	transform: translateX(3px);
+}
+
+/* ── Past event state ──────────────────────────────────────────────────────── */
+.runpace-marathon-info--past .runpace-marathon-info__value--distance {
+	color: var(--wp--preset--color--ink-muted);
+}
+
+.runpace-marathon-info--past .runpace-marathon-info__register-btn {
+	background: var(--wp--preset--color--border) !important;
+	color: var(--wp--preset--color--ink-muted) !important;
+	pointer-events: none;
+}
+
+/* ── Block notice (editor warning) ────────────────────────────────────────── */
+.runpace-block-notice {
+	padding: var(--wp--preset--spacing--4);
+	border-left: 3px solid var(--wp--preset--color--accent);
+	background: var(--wp--preset--color--accent-light);
+	border-radius: 0 var(--wp--custom--radius--sm) var(--wp--custom--radius--sm) 0;
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink-secondary);
+}
+
+/* ── Editor preview chips ──────────────────────────────────────────────────── */
+.runpace-marathon-info__editor-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--2);
+	padding: var(--wp--preset--spacing--3) 0;
+}
+
+.runpace-meta-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.3em 0.75em;
+	background: var(--wp--preset--color--primary-light);
+	color: var(--wp--preset--color--primary-dark);
+	border-radius: var(--wp--custom--radius--pill);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 600;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media ( max-width: 600px ) {
+	.runpace-marathon-info__grid {
+		grid-template-columns: 1fr 1fr;
+	}
+}

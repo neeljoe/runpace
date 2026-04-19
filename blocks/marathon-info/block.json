@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "runpace/marathon-info",
+	"version": "1.0.0",
+	"title": "Marathon Info",
+	"category": "runpace",
+	"icon": "location-alt",
+	"description": "Displays key marathon metadata: date, location, distance, price, elevation, and registration link.",
+	"keywords": [ "marathon", "race", "running", "event" ],
+	"textdomain": "runpace",
+	"usesContext": [ "postId", "postType" ],
+
+	"attributes": {
+		"showDate":         { "type": "boolean", "default": true },
+		"showLocation":     { "type": "boolean", "default": true },
+		"showDistance":     { "type": "boolean", "default": true },
+		"showPrice":        { "type": "boolean", "default": true },
+		"showElevation":    { "type": "boolean", "default": true },
+		"showDifficulty":   { "type": "boolean", "default": true },
+		"showRegisterBtn":  { "type": "boolean", "default": true },
+		"registerBtnLabel": { "type": "string",  "default": "Register Now" },
+		"layout": {
+			"type": "string",
+			"default": "card",
+			"enum": [ "card", "inline", "compact" ]
+		}
+	},
+
+	"supports": {
+		"html":             false,
+		"align":            [ "wide", "full" ],
+		"color": {
+			"background":   true,
+			"text":         true,
+			"gradients":    false
+		},
+		"spacing": {
+			"padding":      true,
+			"margin":       true,
+			"blockGap":     true
+		},
+		"typography": {
+			"fontSize":     true,
+			"lineHeight":   false
+		},
+		"interactivity":    true
+	},
+
+	"style":        "file:./build/style.css",
+	"editorStyle":  "file:./build/editor.css",
+	"editorScript": "file:./build/index.js",
+	"render":       "file:./render.php"
+}

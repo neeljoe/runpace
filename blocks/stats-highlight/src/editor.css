@@ -1,0 +1,37 @@
+/**
+ * RunPace – Stats Highlight Block
+ * Editor-only styles.
+ */
+
+/* ── Force items visible in the editor (no IntersectionObserver) ───────────── */
+.runpace-stats-highlight--editor .runpace-stats-highlight__item {
+	opacity: 1 !important;
+	transform: none !important;
+	transition: none !important;
+}
+
+/* ── Stat item repeater inside InspectorControls ───────────────────────────── */
+.runpace-stats-editor__item {
+	padding-bottom: 4px;
+}
+
+.runpace-stats-editor__row {
+	display: grid;
+	grid-template-columns: 70px 1fr 1fr auto;
+	gap: 8px;
+	align-items: flex-start;
+}
+
+/* ── Theme preview tints in editor canvas ──────────────────────────────────── */
+.runpace-stats-highlight--dark.runpace-stats-highlight--editor {
+	background: var(--wp--preset--color--dark-base, #0f1110);
+}
+
+.runpace-stats-highlight--light.runpace-stats-highlight--editor {
+	background: var(--wp--preset--color--surface, #fff);
+	border: 1px solid var(--wp--preset--color--border, #e2e1dc);
+}
+
+.runpace-stats-highlight--brand.runpace-stats-highlight--editor {
+	background: var(--wp--preset--color--primary, #0bda7a);
+}

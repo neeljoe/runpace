@@ -1,0 +1,48 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "runpace/featured-marathon",
+	"version": "1.0.0",
+	"title": "Featured Marathon",
+	"category": "runpace",
+	"icon": "awards",
+	"description": "A prominent card showcasing a single featured marathon with hero image, race date countdown, distance badge, and registration CTA.",
+	"keywords": [ "marathon", "featured", "hero", "race", "card" ],
+	"textdomain": "runpace",
+	"usesContext": [ "postId", "postType" ],
+
+	"attributes": {
+		"postId": {
+			"type": "number",
+			"default": 0
+		},
+		"showCountdown":     { "type": "boolean", "default": true },
+		"showDistanceBadge": { "type": "boolean", "default": true },
+		"showExcerpt":       { "type": "boolean", "default": true },
+		"showMeta":          { "type": "boolean", "default": true },
+		"ctaLabel":          { "type": "string",  "default": "Register Now" },
+		"learnMoreLabel":    { "type": "string",  "default": "Learn More" },
+		"overlayOpacity": {
+			"type": "number",
+			"default": 55
+		}
+	},
+
+	"supports": {
+		"html":  false,
+		"align": [ "wide", "full" ],
+		"color": {
+			"background": false,
+			"text":       false
+		},
+		"spacing": {
+			"margin": true
+		},
+		"interactivity": true
+	},
+
+	"style":        "file:./build/style.css",
+	"editorStyle":  "file:./build/editor.css",
+	"editorScript": "file:./build/index.js",
+	"render":       "file:./render.php"
+}

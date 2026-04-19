@@ -1,0 +1,289 @@
+/**
+ * RunPace – Training Plan Card Block Styles
+ */
+
+/* ── Base card ─────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card {
+	display: flex;
+	flex-direction: column;
+	background: var(--wp--preset--color--surface);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--lg);
+	overflow: hidden;
+	container-type: inline-size;
+	transition:
+		transform var(--wp--custom--transition--base),
+		box-shadow var(--wp--custom--transition--base);
+}
+
+.runpace-training-plan-card:hover {
+	transform: translateY(-3px);
+	box-shadow: var(--wp--preset--shadow--card-hover);
+}
+
+/* ── Colour scheme variants ────────────────────────────────────────────────── */
+.runpace-training-plan-card--dark {
+	background: var(--wp--preset--color--dark-surface);
+	border-color: var(--wp--preset--color--dark-border);
+	color: #fff;
+}
+
+.runpace-training-plan-card--accent {
+	background: var(--wp--preset--color--primary-light);
+	border-color: var(--wp--preset--color--primary);
+}
+
+/* ── Thumbnail ─────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__thumb-link {
+	display: block;
+	overflow: hidden;
+	aspect-ratio: 3 / 2;
+}
+
+.runpace-training-plan-card__thumb-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform var(--wp--custom--transition--slow);
+	display: block;
+}
+
+.runpace-training-plan-card:hover .runpace-training-plan-card__thumb-img {
+	transform: scale(1.04);
+}
+
+/* ── Body ──────────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--4);
+	padding: var(--wp--preset--spacing--5);
+	flex: 1;
+}
+
+/* ── Header section ────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__header {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--2);
+}
+
+/* ── Badges row ────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--2);
+}
+
+/* ── Level badge ───────────────────────────────────────────────────────────── */
+.runpace-level-badge {
+	display: inline-flex;
+	padding: 0.2em 0.75em;
+	border-radius: var(--wp--custom--radius--pill);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.runpace-level--beginner {
+	background: #d4f7e7;
+	color: #07a85c;
+}
+
+.runpace-level--intermediate {
+	background: #fff3cd;
+	color: #b7791f;
+}
+
+.runpace-level--advanced {
+	background: #ffe6da;
+	color: #c0400c;
+}
+
+/* ── Price badge ───────────────────────────────────────────────────────────── */
+.runpace-price-badge {
+	display: inline-flex;
+	padding: 0.2em 0.75em;
+	border-radius: var(--wp--custom--radius--pill);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.runpace-price-badge--free {
+	background: var(--wp--preset--color--primary-light);
+	color: var(--wp--preset--color--primary-dark);
+}
+
+.runpace-price-badge--paid {
+	background: var(--wp--preset--color--accent-light);
+	color: var(--wp--preset--color--accent);
+}
+
+/* ── Title ─────────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__title {
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--xl);
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0;
+	color: var(--wp--preset--color--ink);
+}
+
+.runpace-training-plan-card--dark .runpace-training-plan-card__title {
+	color: #fff;
+}
+
+.runpace-training-plan-card__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.runpace-training-plan-card__title a:hover {
+	color: var(--wp--preset--color--primary-dark);
+}
+
+/* ── Goal line ─────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__goal {
+	display: flex;
+	align-items: center;
+	gap: 0.4em;
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink-muted);
+	font-weight: 500;
+	margin: 0;
+}
+
+/* ── Excerpt ───────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__excerpt {
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink-secondary);
+	line-height: 1.6;
+	margin: 0;
+	flex: 1;
+}
+
+.runpace-training-plan-card--dark .runpace-training-plan-card__excerpt {
+	color: rgba(255,255,255,0.65);
+}
+
+/* ── Stats grid ────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--wp--preset--spacing--2);
+	margin: 0;
+	padding: var(--wp--preset--spacing--4);
+	background: var(--wp--preset--color--base);
+	border-radius: var(--wp--custom--radius--md);
+}
+
+.runpace-training-plan-card--dark .runpace-training-plan-card__stats {
+	background: rgba(255,255,255,0.06);
+}
+
+.runpace-training-plan-card--accent .runpace-training-plan-card__stats {
+	background: rgba(11,218,122,0.1);
+}
+
+.runpace-training-plan-card__stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.runpace-training-plan-card__stat-value {
+	font-family: var(--wp--preset--font-family--display);
+	font-size: var(--wp--preset--font-size--3xl);
+	color: var(--wp--preset--color--primary-dark);
+	line-height: 1;
+	margin: 0;
+}
+
+.runpace-training-plan-card--dark .runpace-training-plan-card__stat-value {
+	color: var(--wp--preset--color--primary);
+}
+
+.runpace-training-plan-card__stat-label {
+	font-size: var(--wp--preset--font-size--xs);
+	color: var(--wp--preset--color--ink-muted);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-top: 0.2em;
+}
+
+/* ── Actions ───────────────────────────────────────────────────────────────── */
+.runpace-training-plan-card__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--3);
+	margin-top: auto;
+}
+
+.runpace-training-plan-card__cta {
+	display: inline-flex;
+	align-items: center;
+	padding: var(--wp--preset--spacing--3) var(--wp--preset--spacing--5);
+	background: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--ink);
+	border-radius: var(--wp--custom--radius--pill);
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	text-decoration: none;
+	transition: all var(--wp--custom--transition--fast);
+}
+
+.runpace-training-plan-card__cta:hover,
+.runpace-training-plan-card__cta:focus-visible {
+	background: var(--wp--preset--color--primary-dark);
+	color: var(--wp--preset--color--ink);
+	transform: translateY(-1px);
+}
+
+.runpace-training-plan-card__download {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+	padding: var(--wp--preset--spacing--3) var(--wp--preset--spacing--4);
+	background: transparent;
+	color: var(--wp--preset--color--ink-secondary);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--pill);
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 600;
+	text-decoration: none;
+	transition: all var(--wp--custom--transition--fast);
+}
+
+.runpace-training-plan-card__download:hover,
+.runpace-training-plan-card__download:focus-visible {
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--primary-dark);
+}
+
+.runpace-training-plan-card--dark .runpace-training-plan-card__download {
+	border-color: rgba(255,255,255,0.2);
+	color: rgba(255,255,255,0.7);
+}
+
+.runpace-training-plan-card--dark .runpace-training-plan-card__download:hover {
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--primary);
+}
+
+/* ── Container query: narrow ───────────────────────────────────────────────── */
+@container ( max-width: 300px ) {
+	.runpace-training-plan-card__stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.runpace-training-plan-card__stat:last-child:nth-child(odd) {
+		grid-column: span 2;
+	}
+}

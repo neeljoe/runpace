@@ -1,0 +1,46 @@
+/**
+ * RunPace – Marathon Info Block
+ * Editor-only styles (loaded inside the block editor iframe).
+ *
+ * Keep this file focused on editor UX only.
+ * Front-end styles live in style.css.
+ */
+
+/* ── Editor wrapper ────────────────────────────────────────────────────────── */
+.runpace-marathon-info--editor {
+	/* Prevent the placeholder from collapsing to zero height */
+	min-height: 120px;
+}
+
+/* ── Preview chips inside the Placeholder component ───────────────────────── */
+.runpace-marathon-info__editor-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 8px 0 4px;
+}
+
+.runpace-meta-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 0.3em 0.75em;
+	background: var(--wp--preset--color--primary-light, #d4f7e7);
+	color: var(--wp--preset--color--primary-dark, #07a85c);
+	border-radius: 9999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	line-height: 1.4;
+}
+
+/* ── Block notice (wrong post type warning) ────────────────────────────────── */
+.runpace-block-notice {
+	padding: 12px 16px;
+	border-left: 3px solid var(--wp--preset--color--accent, #ff5c1a);
+	background: var(--wp--preset--color--accent-light, #ffe6da);
+	border-radius: 0 6px 6px 0;
+	font-size: 13px;
+	color: var(--wp--preset--color--ink-secondary, #3d3d3a);
+	margin: 0;
+}

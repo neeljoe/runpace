@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "runpace/training-plan-card",
+	"version": "1.0.0",
+	"title": "Training Plan Card",
+	"category": "runpace",
+	"icon": "clipboard",
+	"description": "A compact card displaying training plan details: duration, level, goal, sessions per week, and a download or detail link.",
+	"keywords": [ "training", "plan", "card", "running", "schedule" ],
+	"textdomain": "runpace",
+	"usesContext": [ "postId", "postType" ],
+
+	"attributes": {
+		"showDuration":  { "type": "boolean", "default": true },
+		"showLevel":     { "type": "boolean", "default": true },
+		"showGoal":      { "type": "boolean", "default": true },
+		"showSessions":  { "type": "boolean", "default": true },
+		"showPeakKm":    { "type": "boolean", "default": true },
+		"showFreeBadge": { "type": "boolean", "default": true },
+		"showDownload":  { "type": "boolean", "default": true },
+		"ctaLabel":      { "type": "string",  "default": "View Plan" },
+		"downloadLabel": { "type": "string",  "default": "Download PDF" },
+		"colorScheme": {
+			"type":    "string",
+			"default": "auto",
+			"enum":    [ "auto", "light", "dark", "accent" ]
+		}
+	},
+
+	"supports": {
+		"html":  false,
+		"align": [ "wide" ],
+		"color": {
+			"background": true,
+			"text":       true
+		},
+		"spacing": {
+			"padding": true,
+			"margin":  true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+
+	"style":        "file:./build/style.css",
+	"editorStyle":  "file:./build/editor.css",
+	"editorScript": "file:./build/index.js",
+	"render":       "file:./render.php"
+}
