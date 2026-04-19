@@ -1,0 +1,43 @@
+/*
+ * RunPace – global.css
+ * Minimal resets and utilities not expressible in theme.json.
+ */
+
+*,*::before,*::after { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: no-preference) {
+	html { scroll-behavior: smooth; }
+}
+
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+
+:focus-visible {
+	outline: 2px solid var(--wp--preset--color--primary);
+	outline-offset: 3px;
+}
+
+:target {
+	scroll-margin-top: var(--wp--custom--header--height, 72px);
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px; height: 1px;
+	padding: 0; margin: -1px;
+	overflow: hidden;
+	clip: rect(0,0,0,0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
+.runpace-card {
+	transition: box-shadow var(--wp--custom--transition--base, 250ms ease),
+	            transform   var(--wp--custom--transition--base, 250ms ease);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.runpace-card:hover {
+		box-shadow: var(--wp--preset--shadow--card-hover);
+		transform: translateY(-2px);
+	}
+}
