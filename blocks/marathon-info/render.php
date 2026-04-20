@@ -1,226 +1,182 @@
 <?php
 /**
- * RunPace – Marathon Info Block
+ * Marathon Info Block – render.php
  *
- * Server-side render callback. Pulls post meta and taxonomy terms for the
- * current marathon post and outputs a structured info panel.
+ * Server-side rendering for the runpace/marathon-info block.
+ * All data comes from post meta registered in inc/03-meta-fields.php.
  *
- * Available variables (injected by WordPress):
- *   $attributes (array)  — Block attributes from block.json.
- *   $content    (string) — InnerBlocks content (unused here).
- *   $block      (object) — WP_Block instance; provides context.
+ * Variables injected by WordPress:
+ *   $attributes  (array)    – block attributes
+ *   $content     (string)   – inner blocks HTML (unused here)
+ *   $block       (WP_Block) – block instance with ->context['postId']
  *
  * @package RunPace
- * @since   1.0.0
  */
 
 declare( strict_types=1 );
 
-// ── Resolve post ID from block context (works inside Query Loop) ──────────────
-$post_id = absint( $block->context['postId'] ?? get_the_ID() );
+$post_id = $block->context['postId'] ?? get_the_ID();
+
 if ( ! $post_id ) {
 	return;
 }
 
-// ── Validate post type ────────────────────────────────────────────────────────
-if ( 'marathon' !== get_post_type( $post_id ) ) {
-	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-		echo '<p class="runpace-block-notice">' . esc_html__( 'Marathon Info block: assign this to a marathon post.', 'runpace' ) . '</p>';
-	}
-	return;
-}
+// ── Fetch meta ────────────────────────────────────────────────────────────────
+$race_date         = get_post_meta( $post_id, '_runpace_race_date',       true );
+$city              = get_post_meta( $post_id, '_runpace_city',            true );
+$country           = get_post_meta( $post_id, '_runpace_country',         true );
+$distance_label    = get_post_meta( $post_id, '_runpace_distance_label',  true );
+$registration_url  = get_post_meta( $post_id, '_runpace_registration_url', true );
+$price             = (float) get_post_meta( $post_id, '_runpace_price',   true );
+$elevation_gain    = (int)   get_post_meta( $post_id, '_runpace_elevation_gain', true );
+$difficulty        = (int)   get_post_meta( $post_id, '_runpace_difficulty_rating', true );
+$distance_terms    = get_the_terms( $post_id, 'runpace_distance' );
+$event_type_terms  = get_the_terms( $post_id, 'runpace_event_type' );
 
-// ── Meta retrieval ────────────────────────────────────────────────────────────
-$race_date         = get_post_meta( $post_id, '_runpace_race_date',         true );
-$city              = get_post_meta( $post_id, '_runpace_city',              true );
-$country           = get_post_meta( $post_id, '_runpace_country',           true );
-$distance_label    = get_post_meta( $post_id, '_runpace_distance_label',    true );
-$registration_url  = get_post_meta( $post_id, '_runpace_registration_url',  true );
-$price             = get_post_meta( $post_id, '_runpace_price',             true );
-$elevation_gain    = get_post_meta( $post_id, '_runpace_elevation_gain',    true );
-$difficulty_rating = (int) get_post_meta( $post_id, '_runpace_difficulty_rating', true );
+// ── Derived display values ────────────────────────────────────────────────────
+$race_timestamp   = $race_date ? strtotime( $race_date ) : false;
+$formatted_date   = $race_timestamp ? date_i18n( get_option( 'date_format' ), $race_timestamp ) : '';
+$location_string  = implode( ', ', array_filter( [ $city, $country ] ) );
+$price_display    = $price > 0 ? '$' . number_format( $price, 0 ) : __( 'Free', 'runpace' );
+$distance_display = $distance_label ?: ( $distance_terms && ! is_wp_error( $distance_terms ) ? $distance_terms[0]->name : '' );
+$event_type       = $event_type_terms && ! is_wp_error( $event_type_terms ) ? $event_type_terms[0]->name : '';
 
-// ── Taxonomy terms for distance ───────────────────────────────────────────────
-$distance_terms = get_the_terms( $post_id, 'runpace_distance' );
-$distance_names = ( $distance_terms && ! is_wp_error( $distance_terms ) )
-	? implode( ', ', wp_list_pluck( $distance_terms, 'name' ) )
-	: $distance_label;
-
-// ── Date formatting ───────────────────────────────────────────────────────────
-$formatted_date = '';
-$is_past        = false;
-if ( $race_date ) {
-	$timestamp      = strtotime( $race_date );
-	$formatted_date = $timestamp ? date_i18n( get_option( 'date_format' ), $timestamp ) : esc_html( $race_date );
-	$is_past        = $timestamp < time();
-
-	// Days until race.
-	$days_until = $timestamp ? (int) ceil( ( $timestamp - time() ) / DAY_IN_SECONDS ) : null;
-}
-
-// ── Price formatting ──────────────────────────────────────────────────────────
-$price_display = $price
-	? '$' . number_format( (float) $price, 0 )
-	: __( 'Free', 'runpace' );
-
-// ── Difficulty stars ──────────────────────────────────────────────────────────
-$difficulty_html = '';
-if ( $difficulty_rating >= 1 ) {
-	$filled = min( 5, $difficulty_rating );
-	for ( $i = 1; $i <= 5; $i++ ) {
-		$star_class = $i <= $filled ? 'runpace-star runpace-star--filled' : 'runpace-star';
-		$difficulty_html .= '<span class="' . esc_attr( $star_class ) . '" aria-hidden="true">★</span>';
-	}
+// ── Countdown ─────────────────────────────────────────────────────────────────
+$days_until  = '';
+$is_past     = false;
+if ( $race_timestamp ) {
+	$diff       = $race_timestamp - time();
+	$is_past    = $diff < 0;
+	$days_until = $is_past ? 0 : (int) ceil( $diff / DAY_IN_SECONDS );
 }
 
 // ── Block attributes ──────────────────────────────────────────────────────────
-$show_date        = ! empty( $attributes['showDate'] );
-$show_location    = ! empty( $attributes['showLocation'] );
-$show_distance    = ! empty( $attributes['showDistance'] );
-$show_price       = ! empty( $attributes['showPrice'] );
-$show_elevation   = ! empty( $attributes['showElevation'] );
-$show_difficulty  = ! empty( $attributes['showDifficulty'] );
-$show_register    = ! empty( $attributes['showRegisterBtn'] );
-$register_label   = sanitize_text_field( $attributes['registerBtnLabel'] ?? __( 'Register Now', 'runpace' ) );
-$layout           = in_array( $attributes['layout'] ?? 'card', [ 'card', 'inline', 'compact' ], true )
-	? $attributes['layout']
-	: 'card';
+$layout               = $attributes['layout']             ?? 'grid';
+$show_countdown       = $attributes['showCountdown']      ?? true;
+$show_register_button = $attributes['showRegisterButton'] ?? true;
+$register_label       = $attributes['registerLabel']      ?? __( 'Register Now', 'runpace' );
 
-// ── Wrapper classes & attrs ───────────────────────────────────────────────────
-$wrapper_attrs = get_block_wrapper_attributes(
+// ── Wrapper ───────────────────────────────────────────────────────────────────
+$wrapper_attributes = get_block_wrapper_attributes(
 	[
-		'class' => implode( ' ', array_filter( [
-			'runpace-marathon-info',
-			'runpace-marathon-info--' . $layout,
-			$is_past ? 'runpace-marathon-info--past' : '',
-		] ) ),
+		'class'      => "runpace-marathon-info runpace-marathon-info--{$layout}" . ( $is_past ? ' is-past' : '' ),
+		'data-post-id' => (string) $post_id,
 	]
 );
 ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
-	<?php if ( $is_past ) : ?>
-		<div class="runpace-marathon-info__badge runpace-marathon-info__badge--past">
-			<?php esc_html_e( 'Past event', 'runpace' ); ?>
-		</div>
-	<?php elseif ( isset( $days_until ) && $days_until <= 30 && $days_until >= 0 ) : ?>
-		<div class="runpace-marathon-info__badge runpace-marathon-info__badge--soon">
-			<?php
-			printf(
-				/* translators: %d = number of days */
-				esc_html( _n( '%d day to go', '%d days to go', $days_until, 'runpace' ) ),
-				(int) $days_until
-			);
-			?>
-		</div>
+	<?php if ( $show_countdown && $race_timestamp && ! $is_past ) : ?>
+	<div class="runpace-mi__countdown-badge">
+		<span class="runpace-mi__countdown-number"><?php echo esc_html( (string) $days_until ); ?></span>
+		<span class="runpace-mi__countdown-label"><?php esc_html_e( 'days to go', 'runpace' ); ?></span>
+	</div>
+	<?php elseif ( $is_past ) : ?>
+	<div class="runpace-mi__past-badge"><?php esc_html_e( 'Past Event', 'runpace' ); ?></div>
 	<?php endif; ?>
 
-	<dl class="runpace-marathon-info__grid">
+	<dl class="runpace-mi__grid">
 
-		<?php if ( $show_date && $formatted_date ) : ?>
-			<div class="runpace-marathon-info__item">
-				<dt class="runpace-marathon-info__label">
-					<span class="runpace-icon" aria-hidden="true">📅</span>
-					<?php esc_html_e( 'Date', 'runpace' ); ?>
-				</dt>
-				<dd class="runpace-marathon-info__value">
-					<time datetime="<?php echo esc_attr( $race_date ); ?>">
-						<?php echo esc_html( $formatted_date ); ?>
-					</time>
-				</dd>
-			</div>
+		<?php if ( $formatted_date ) : ?>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">📅</span>
+				<?php esc_html_e( 'Date', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value"><?php echo esc_html( $formatted_date ); ?></dd>
+		</div>
 		<?php endif; ?>
 
-		<?php if ( $show_location && ( $city || $country ) ) : ?>
-			<div class="runpace-marathon-info__item">
-				<dt class="runpace-marathon-info__label">
-					<span class="runpace-icon" aria-hidden="true">📍</span>
-					<?php esc_html_e( 'Location', 'runpace' ); ?>
-				</dt>
-				<dd class="runpace-marathon-info__value">
-					<?php
-					$parts = array_filter( [ $city, $country ] );
-					echo esc_html( implode( ', ', $parts ) );
-					?>
-				</dd>
-			</div>
+		<?php if ( $location_string ) : ?>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">📍</span>
+				<?php esc_html_e( 'Location', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value"><?php echo esc_html( $location_string ); ?></dd>
+		</div>
 		<?php endif; ?>
 
-		<?php if ( $show_distance && $distance_names ) : ?>
-			<div class="runpace-marathon-info__item">
-				<dt class="runpace-marathon-info__label">
-					<span class="runpace-icon" aria-hidden="true">🏃</span>
-					<?php esc_html_e( 'Distance', 'runpace' ); ?>
-				</dt>
-				<dd class="runpace-marathon-info__value runpace-marathon-info__value--distance">
-					<?php echo esc_html( $distance_names ); ?>
-				</dd>
-			</div>
+		<?php if ( $distance_display ) : ?>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">🏃</span>
+				<?php esc_html_e( 'Distance', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value"><?php echo esc_html( $distance_display ); ?></dd>
+		</div>
 		<?php endif; ?>
 
-		<?php if ( $show_price ) : ?>
-			<div class="runpace-marathon-info__item">
-				<dt class="runpace-marathon-info__label">
-					<span class="runpace-icon" aria-hidden="true">💳</span>
-					<?php esc_html_e( 'Entry fee', 'runpace' ); ?>
-				</dt>
-				<dd class="runpace-marathon-info__value runpace-marathon-info__value--price">
-					<?php echo esc_html( $price_display ); ?>
-				</dd>
-			</div>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">💰</span>
+				<?php esc_html_e( 'Entry fee', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value"><?php echo esc_html( $price_display ); ?></dd>
+		</div>
+
+		<?php if ( $elevation_gain ) : ?>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">⛰️</span>
+				<?php esc_html_e( 'Elevation', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %d = metres of elevation gain */
+						__( '%dm gain', 'runpace' ),
+						$elevation_gain
+					)
+				);
+				?>
+			</dd>
+		</div>
 		<?php endif; ?>
 
-		<?php if ( $show_elevation && $elevation_gain ) : ?>
-			<div class="runpace-marathon-info__item">
-				<dt class="runpace-marathon-info__label">
-					<span class="runpace-icon" aria-hidden="true">⛰️</span>
-					<?php esc_html_e( 'Elevation gain', 'runpace' ); ?>
-				</dt>
-				<dd class="runpace-marathon-info__value">
-					<?php
-					printf(
-						/* translators: %s = metres value */
-						esc_html__( '%sm', 'runpace' ),
-						esc_html( number_format( (int) $elevation_gain ) )
-					);
-					?>
-				</dd>
-			</div>
-		<?php endif; ?>
-
-		<?php if ( $show_difficulty && $difficulty_html ) : ?>
-			<div class="runpace-marathon-info__item">
-				<dt class="runpace-marathon-info__label">
-					<span class="runpace-icon" aria-hidden="true">⚡</span>
-					<?php esc_html_e( 'Difficulty', 'runpace' ); ?>
-				</dt>
-				<dd class="runpace-marathon-info__value">
-					<span class="runpace-difficulty" role="img"
-						aria-label="<?php echo esc_attr( sprintf(
-							/* translators: %d = difficulty rating 1–5 */
-							__( 'Difficulty: %d out of 5', 'runpace' ),
-							$difficulty_rating
-						) ); ?>">
-						<?php echo $difficulty_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+		<?php if ( $difficulty >= 1 ) : ?>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">⭐</span>
+				<?php esc_html_e( 'Difficulty', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value runpace-mi__stars" aria-label="<?php echo esc_attr( sprintf( __( 'Difficulty: %d out of 5', 'runpace' ), $difficulty ) ); ?>">
+				<?php for ( $i = 1; $i <= 5; $i++ ) : ?>
+					<span class="runpace-mi__star<?php echo $i <= $difficulty ? ' is-filled' : ''; ?>" aria-hidden="true">
+						<?php echo $i <= $difficulty ? '★' : '☆'; ?>
 					</span>
-				</dd>
-			</div>
+				<?php endfor; ?>
+			</dd>
+		</div>
+		<?php endif; ?>
+
+		<?php if ( $event_type ) : ?>
+		<div class="runpace-mi__item">
+			<dt class="runpace-mi__label">
+				<span class="runpace-mi__icon" aria-hidden="true">🏷️</span>
+				<?php esc_html_e( 'Type', 'runpace' ); ?>
+			</dt>
+			<dd class="runpace-mi__value">
+				<span class="runpace-mi__badge"><?php echo esc_html( $event_type ); ?></span>
+			</dd>
+		</div>
 		<?php endif; ?>
 
 	</dl>
 
-	<?php if ( $show_register && $registration_url ) : ?>
-		<div class="runpace-marathon-info__cta">
-			<a
-				href="<?php echo esc_url( $registration_url ); ?>"
-				class="wp-block-button__link runpace-marathon-info__register-btn"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				<?php echo esc_html( $register_label ); ?>
-				<span class="runpace-btn-arrow" aria-hidden="true">→</span>
-			</a>
-		</div>
+	<?php if ( $show_register_button && $registration_url && ! $is_past ) : ?>
+	<div class="runpace-mi__cta">
+		<a
+			href="<?php echo esc_url( $registration_url ); ?>"
+			class="runpace-mi__register-btn wp-element-button"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			<?php echo esc_html( $register_label ); ?>
+			<span class="runpace-mi__btn-arrow" aria-hidden="true">→</span>
+		</a>
+	</div>
 	<?php endif; ?>
 
 </div>

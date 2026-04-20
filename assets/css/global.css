@@ -1,43 +1,129 @@
-/*
+/**
  * RunPace – global.css
- * Minimal resets and utilities not expressible in theme.json.
+ *
+ * Site-wide utility styles not expressible via theme.json.
+ * Enqueued on the frontend via runpace_enqueue_assets() in functions.php.
+ * Keep this file lean — theme.json handles the vast majority of styling.
  */
 
-*,*::before,*::after { box-sizing: border-box; }
-
+/* ── Smooth scrolling ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
-	html { scroll-behavior: smooth; }
+	:root { scroll-behavior: smooth; }
 }
 
-img, picture, video, canvas, svg { display: block; max-width: 100%; }
-
+/* ── Focus ring ────────────────────────────────────────────────────────────── */
 :focus-visible {
 	outline: 2px solid var(--wp--preset--color--primary);
 	outline-offset: 3px;
+	border-radius: 3px;
 }
 
+/* ── Skip-to-content link ──────────────────────────────────────────────────── */
+.skip-link {
+	position: absolute;
+	top: -100%;
+	left: var(--wp--preset--spacing--4);
+	background: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--ink);
+	font-weight: 700;
+	font-size: var(--wp--preset--font-size--sm);
+	padding: var(--wp--preset--spacing--3) var(--wp--preset--spacing--5);
+	border-radius: var(--wp--custom--radius--md);
+	z-index: 9999;
+	text-decoration: none;
+	transition: top var(--wp--custom--transition--fast);
+}
+
+.skip-link:focus { top: var(--wp--preset--spacing--4); }
+
+/* ── Selection colour ──────────────────────────────────────────────────────── */
+::selection {
+	background: var(--wp--preset--color--primary-light);
+	color: var(--wp--preset--color--ink);
+}
+
+/* ── Scrollbar (Webkit) ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--wp--preset--color--base); }
+::-webkit-scrollbar-thumb {
+	background: var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--pill);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--wp--preset--color--ink-muted); }
+
+/* ── Header height compensation ────────────────────────────────────────────── */
+/* Anchors that are targets of fragment links should scroll below the sticky header */
 :target {
-	scroll-margin-top: var(--wp--custom--header--height, 72px);
+	scroll-margin-top: calc( var(--wp--custom--header--height) + var(--wp--preset--spacing--5) );
 }
 
+/* ── Sticky header backdrop ────────────────────────────────────────────────── */
+.runpace-header {
+	-webkit-backdrop-filter: blur(8px) saturate(1.2);
+	backdrop-filter: blur(8px) saturate(1.2);
+	background: rgba(255,255,255,0.92) !important;
+}
+
+/* ── Card hover transition helper ──────────────────────────────────────────── */
+/* Applied to any card that should lift on hover */
+.runpace-card {
+	transition:
+		box-shadow var(--wp--custom--transition--base),
+		transform  var(--wp--custom--transition--base);
+}
+
+.runpace-card:hover {
+	box-shadow: var(--wp--preset--shadow--card-hover);
+	transform: translateY(-3px);
+}
+
+/* ── Visually hidden (screen-reader only) ──────────────────────────────────── */
 .sr-only {
 	position: absolute;
-	width: 1px; height: 1px;
-	padding: 0; margin: -1px;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
 	overflow: hidden;
-	clip: rect(0,0,0,0);
+	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border-width: 0;
 }
 
-.runpace-card {
-	transition: box-shadow var(--wp--custom--transition--base, 250ms ease),
-	            transform   var(--wp--custom--transition--base, 250ms ease);
+/* ── Truncate text to N lines ──────────────────────────────────────────────── */
+.line-clamp-2 {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-	.runpace-card:hover {
-		box-shadow: var(--wp--preset--shadow--card-hover);
-		transform: translateY(-2px);
-	}
+.line-clamp-3 {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* ── Responsive image helper ───────────────────────────────────────────────── */
+.img-cover {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* ── Gradient text ─────────────────────────────────────────────────────────── */
+.text-gradient-brand {
+	background: var(--wp--preset--gradient--brand-diagonal);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* ── Print styles ──────────────────────────────────────────────────────────── */
+@media print {
+	.runpace-header,
+	.runpace-footer,
+	.runpace-mf__controls,
+	.runpace-mi__cta { display: none !important; }
 }

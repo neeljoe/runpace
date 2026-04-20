@@ -1,243 +1,125 @@
 <?php
 /**
- * RunPace – Featured Marathon Block
- *
- * Renders a prominent hero-style card for a single featured marathon.
- * Pulls from either:
- *   1. An explicitly selected post ID (editor-chosen post).
- *   2. Block context (when nested inside a Query Loop).
- *   3. Automatic query for the most recent _runpace_is_featured marathon.
+ * Featured Marathon Block – render.php
  *
  * @package RunPace
- * @since   1.0.0
  */
 
 declare( strict_types=1 );
 
-// ── Resolve post ID ───────────────────────────────────────────────────────────
-$post_id = 0;
+$post_id = $block->context['postId'] ?? get_the_ID();
+if ( ! $post_id ) return;
 
-// Priority 1: explicitly chosen in the editor.
-if ( ! empty( $attributes['postId'] ) ) {
-	$post_id = absint( $attributes['postId'] );
-}
+$race_date        = get_post_meta( $post_id, '_runpace_race_date', true );
+$city             = get_post_meta( $post_id, '_runpace_city', true );
+$country          = get_post_meta( $post_id, '_runpace_country', true );
+$registration_url = get_post_meta( $post_id, '_runpace_registration_url', true );
+$price            = (float) get_post_meta( $post_id, '_runpace_price', true );
+$dist_terms       = get_the_terms( $post_id, 'runpace_distance' );
+$event_terms      = get_the_terms( $post_id, 'runpace_event_type' );
 
-// Priority 2: Query Loop context.
-if ( ! $post_id && ! empty( $block->context['postId'] ) ) {
-	$post_id = absint( $block->context['postId'] );
-}
+$race_timestamp   = $race_date ? strtotime( $race_date ) : false;
+$formatted_date   = $race_timestamp ? date_i18n( get_option( 'date_format' ), $race_timestamp ) : '';
+$is_past          = $race_timestamp && $race_timestamp < time();
+$days_to_go       = ( ! $is_past && $race_timestamp ) ? max( 0, (int) ceil( ( $race_timestamp - time() ) / DAY_IN_SECONDS ) ) : 0;
+$dist_names       = ( $dist_terms && ! is_wp_error( $dist_terms ) ) ? wp_list_pluck( $dist_terms, 'name' ) : [];
+$event_name       = ( $event_terms && ! is_wp_error( $event_terms ) ) ? $event_terms[0]->name : '';
+$price_display    = $price > 0 ? '$' . number_format( $price, 0 ) : __( 'Free', 'runpace' );
+$thumb_url        = get_the_post_thumbnail_url( $post_id, 'runpace-hero' );
+$permalink        = get_permalink( $post_id );
 
-// Priority 3: auto-query for a featured marathon.
-if ( ! $post_id ) {
-	$featured_query = new WP_Query( [
-		'post_type'      => 'marathon',
-		'post_status'    => 'publish',
-		'posts_per_page' => 1,
-		'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery
-			[
-				'key'   => '_runpace_is_featured',
-				'value' => '1',
-			],
-		],
-		'orderby'        => 'meta_value',
-		'meta_key'       => '_runpace_race_date', // phpcs:ignore WordPress.DB.SlowDBQuery
-		'order'          => 'ASC',
-		'no_found_rows'  => true,
-	] );
+$show_countdown  = $attributes['showCountdown']    ?? true;
+$primary_label   = $attributes['primaryLabel']     ?? __( 'Register Now', 'runpace' );
+$secondary_label = $attributes['secondaryLabel']   ?? __( 'View Details', 'runpace' );
+$overlay_opacity = (float) ( $attributes['overlayOpacity'] ?? 0.55 );
 
-	if ( $featured_query->have_posts() ) {
-		$post_id = (int) $featured_query->posts[0]->ID;
-	}
-}
-
-if ( ! $post_id || 'marathon' !== get_post_type( $post_id ) ) {
-	// Editor placeholder only — not shown on front-end.
-	if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
-		echo '<div class="runpace-featured-marathon runpace-featured-marathon--placeholder">';
-		echo '<p>' . esc_html__( 'Featured Marathon: no featured marathon found. Mark a marathon as featured or use the Post Picker in the sidebar.', 'runpace' ) . '</p>';
-		echo '</div>';
-	}
-	return;
-}
-
-// ── Post data ─────────────────────────────────────────────────────────────────
-$post         = get_post( $post_id );
-$title        = get_the_title( $post_id );
-$permalink    = get_permalink( $post_id );
-$excerpt      = has_excerpt( $post_id )
-	? get_the_excerpt( $post_id )
-	: wp_trim_words( get_the_content( null, false, $post_id ), 25, '…' );
-
-// ── Meta ──────────────────────────────────────────────────────────────────────
-$race_date        = get_post_meta( $post_id, '_runpace_race_date',         true );
-$city             = get_post_meta( $post_id, '_runpace_city',              true );
-$country          = get_post_meta( $post_id, '_runpace_country',           true );
-$registration_url = get_post_meta( $post_id, '_runpace_registration_url',  true );
-$price            = get_post_meta( $post_id, '_runpace_price',             true );
-
-// ── Distance taxonomy ─────────────────────────────────────────────────────────
-$distance_terms = get_the_terms( $post_id, 'runpace_distance' );
-$distance_label = '';
-if ( $distance_terms && ! is_wp_error( $distance_terms ) ) {
-	$distance_label = implode( ' · ', wp_list_pluck( $distance_terms, 'name' ) );
-}
-if ( ! $distance_label ) {
-	$distance_label = get_post_meta( $post_id, '_runpace_distance_label', true );
-}
-
-// ── Date / countdown ─────────────────────────────────────────────────────────
-$timestamp      = $race_date ? strtotime( $race_date ) : 0;
-$formatted_date = $timestamp ? date_i18n( get_option( 'date_format' ), $timestamp ) : '';
-$is_past        = $timestamp && $timestamp < time();
-$days_until     = $timestamp && ! $is_past ? (int) ceil( ( $timestamp - time() ) / DAY_IN_SECONDS ) : null;
-
-// ── Featured image ────────────────────────────────────────────────────────────
-$image_id  = get_post_thumbnail_id( $post_id );
-$image_url = $image_id
-	? wp_get_attachment_image_url( $image_id, 'runpace-hero' )
-	: '';
-
-// ── Block attributes ──────────────────────────────────────────────────────────
-$show_countdown    = ! empty( $attributes['showCountdown'] );
-$show_badge        = ! empty( $attributes['showDistanceBadge'] );
-$show_excerpt      = ! empty( $attributes['showExcerpt'] );
-$show_meta         = ! empty( $attributes['showMeta'] );
-$cta_label         = sanitize_text_field( $attributes['ctaLabel']       ?? __( 'Register Now', 'runpace' ) );
-$learn_label       = sanitize_text_field( $attributes['learnMoreLabel'] ?? __( 'Learn More',   'runpace' ) );
-$overlay_opacity   = min( 100, max( 0, (int) ( $attributes['overlayOpacity'] ?? 55 ) ) );
-
-// ── Location string ───────────────────────────────────────────────────────────
-$location_parts = array_filter( [ $city, $country ] );
-$location_str   = implode( ', ', $location_parts );
-
-// ── Wrapper ───────────────────────────────────────────────────────────────────
-$wrapper_attrs = get_block_wrapper_attributes(
-	[
-		'class'              => implode( ' ', array_filter( [
-			'runpace-featured-marathon',
-			$is_past ? 'runpace-featured-marathon--past' : 'runpace-featured-marathon--upcoming',
-			$image_url ? '' : 'runpace-featured-marathon--no-image',
-		] ) ),
-		'style'              => $image_url
-			? '--runpace-hero-image: url(' . esc_url( $image_url ) . '); --runpace-overlay-opacity: ' . ( $overlay_opacity / 100 ) . ';'
-			: '--runpace-overlay-opacity: ' . ( $overlay_opacity / 100 ) . ';',
-		'aria-labelledby'    => 'rp-featured-' . $post_id,
-	]
+$wrapper_attributes = get_block_wrapper_attributes(
+	[ 'class' => 'runpace-featured-marathon' . ( $is_past ? ' is-past' : '' ) ]
 );
 ?>
-<article <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
-	<?php if ( $image_url ) : ?>
-		<div class="runpace-featured-marathon__backdrop" aria-hidden="true"></div>
-	<?php else : ?>
-		<div class="runpace-featured-marathon__backdrop runpace-featured-marathon__backdrop--gradient" aria-hidden="true"></div>
+	<?php if ( $thumb_url ) : ?>
+	<div class="runpace-fm__backdrop">
+		<img
+			src="<?php echo esc_url( $thumb_url ); ?>"
+			alt=""
+			class="runpace-fm__backdrop-img"
+			loading="eager"
+			decoding="async"
+		/>
+		<div
+			class="runpace-fm__overlay"
+			style="background: rgba(0,0,0,<?php echo esc_attr( (string) $overlay_opacity ); ?>);"
+			aria-hidden="true"
+		></div>
+	</div>
 	<?php endif; ?>
 
-	<div class="runpace-featured-marathon__content">
+	<div class="runpace-fm__content">
 
-		<header class="runpace-featured-marathon__header">
-
-			<?php if ( $show_badge && $distance_label ) : ?>
-				<div class="runpace-featured-marathon__distance-badge">
-					<?php echo esc_html( $distance_label ); ?>
-				</div>
+		<div class="runpace-fm__badges">
+			<?php if ( $event_name ) : ?>
+			<span class="runpace-fm__event-badge"><?php echo esc_html( $event_name ); ?></span>
 			<?php endif; ?>
+			<?php foreach ( $dist_names as $dist ) : ?>
+			<span class="runpace-fm__dist-badge"><?php echo esc_html( $dist ); ?></span>
+			<?php endforeach; ?>
+		</div>
 
-			<?php if ( $is_past ) : ?>
-				<div class="runpace-featured-marathon__status runpace-featured-marathon__status--past">
-					<?php esc_html_e( 'Past event', 'runpace' ); ?>
-				</div>
+		<h2 class="runpace-fm__title">
+			<a href="<?php echo esc_url( $permalink ); ?>" class="runpace-fm__title-link">
+				<?php echo esc_html( get_the_title( $post_id ) ); ?>
+			</a>
+		</h2>
+
+		<div class="runpace-fm__meta-chips">
+			<?php if ( $formatted_date ) : ?>
+			<span class="runpace-fm__chip">
+				<span aria-hidden="true">📅</span>
+				<?php echo esc_html( $formatted_date ); ?>
+			</span>
 			<?php endif; ?>
-
-			<h2
-				id="rp-featured-<?php echo esc_attr( (string) $post_id ); ?>"
-				class="runpace-featured-marathon__title"
-			>
-				<?php echo esc_html( $title ); ?>
-			</h2>
-
-			<?php if ( $location_str ) : ?>
-				<p class="runpace-featured-marathon__location">
-					<span aria-hidden="true">📍</span>
-					<?php echo esc_html( $location_str ); ?>
-				</p>
+			<?php if ( $city || $country ) : ?>
+			<span class="runpace-fm__chip">
+				<span aria-hidden="true">📍</span>
+				<?php echo esc_html( implode( ', ', array_filter( [ $city, $country ] ) ) ); ?>
+			</span>
 			<?php endif; ?>
+			<span class="runpace-fm__chip">
+				<span aria-hidden="true">💰</span>
+				<?php echo esc_html( $price_display ); ?>
+			</span>
+		</div>
 
-		</header>
-
-		<?php if ( $show_excerpt && $excerpt ) : ?>
-			<p class="runpace-featured-marathon__excerpt">
-				<?php echo esc_html( $excerpt ); ?>
-			</p>
+		<?php if ( $show_countdown && ! $is_past && $days_to_go > 0 ) : ?>
+		<div class="runpace-fm__countdown" aria-label="<?php echo esc_attr( sprintf( __( '%d days until race', 'runpace' ), $days_to_go ) ); ?>">
+			<span class="runpace-fm__countdown-num"><?php echo esc_html( (string) $days_to_go ); ?></span>
+			<span class="runpace-fm__countdown-lbl"><?php esc_html_e( 'days to go', 'runpace' ); ?></span>
+		</div>
+		<?php elseif ( $is_past ) : ?>
+		<div class="runpace-fm__past-label"><?php esc_html_e( 'Past event', 'runpace' ); ?></div>
 		<?php endif; ?>
 
-		<?php if ( $show_meta ) : ?>
-			<div class="runpace-featured-marathon__meta">
-
-				<?php if ( $formatted_date ) : ?>
-					<div class="runpace-featured-marathon__meta-item">
-						<span class="runpace-featured-marathon__meta-icon" aria-hidden="true">📅</span>
-						<time
-							class="runpace-featured-marathon__meta-value"
-							datetime="<?php echo esc_attr( $race_date ); ?>"
-						>
-							<?php echo esc_html( $formatted_date ); ?>
-						</time>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( $price ) : ?>
-					<div class="runpace-featured-marathon__meta-item">
-						<span class="runpace-featured-marathon__meta-icon" aria-hidden="true">💳</span>
-						<span class="runpace-featured-marathon__meta-value">
-							<?php echo esc_html( '$' . number_format( (float) $price, 0 ) ); ?>
-						</span>
-					</div>
-				<?php endif; ?>
-
-			</div>
-		<?php endif; ?>
-
-		<?php if ( $show_countdown && null !== $days_until ) : ?>
-			<div class="runpace-featured-marathon__countdown" aria-label="<?php
-				echo esc_attr( sprintf(
-					/* translators: %d = days */
-					__( '%d days until the race', 'runpace' ),
-					$days_until
-				) );
-			?>">
-				<span class="runpace-featured-marathon__countdown-number">
-					<?php echo esc_html( number_format( $days_until ) ); ?>
-				</span>
-				<span class="runpace-featured-marathon__countdown-label">
-					<?php echo esc_html( _n( 'day to go', 'days to go', $days_until, 'runpace' ) ); ?>
-				</span>
-			</div>
-		<?php endif; ?>
-
-		<div class="runpace-featured-marathon__actions">
-
+		<div class="runpace-fm__ctas">
 			<?php if ( $registration_url && ! $is_past ) : ?>
-				<a
-					href="<?php echo esc_url( $registration_url ); ?>"
-					class="runpace-featured-marathon__cta runpace-featured-marathon__cta--primary"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<?php echo esc_html( $cta_label ); ?>
-					<span class="runpace-btn-arrow" aria-hidden="true">→</span>
-				</a>
+			<a
+				href="<?php echo esc_url( $registration_url ); ?>"
+				class="runpace-fm__btn runpace-fm__btn--primary wp-element-button"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<?php echo esc_html( $primary_label ); ?>
+				<span aria-hidden="true">→</span>
+			</a>
 			<?php endif; ?>
-
 			<a
 				href="<?php echo esc_url( $permalink ); ?>"
-				class="runpace-featured-marathon__cta runpace-featured-marathon__cta--secondary"
+				class="runpace-fm__btn runpace-fm__btn--secondary"
 			>
-				<?php echo esc_html( $learn_label ); ?>
+				<?php echo esc_html( $secondary_label ); ?>
 			</a>
-
 		</div>
 
 	</div>
-
-</article>
+</div>

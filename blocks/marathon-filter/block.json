@@ -1,0 +1,58 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "runpace/marathon-filter",
+	"version": "1.0.0",
+	"title": "Marathon Filter",
+	"category": "runpace",
+	"description": "Interactive filter UI for marathon listings. Filter by distance, location, and date using the WordPress Interactivity API.",
+	"keywords": [ "marathon", "filter", "search", "interactive", "race" ],
+	"textdomain": "runpace",
+
+	"attributes": {
+		"postsPerPage": {
+			"type": "integer",
+			"default": 9
+		},
+		"showDistanceFilter": {
+			"type": "boolean",
+			"default": true
+		},
+		"showLocationFilter": {
+			"type": "boolean",
+			"default": true
+		},
+		"showDateFilter": {
+			"type": "boolean",
+			"default": true
+		},
+		"showViewToggle": {
+			"type": "boolean",
+			"default": true
+		},
+		"defaultView": {
+			"type": "string",
+			"default": "grid",
+			"enum": [ "grid", "list" ]
+		}
+	},
+
+	"supports": {
+		"html": false,
+		"color": {
+			"background": true,
+			"text": false
+		},
+		"spacing": {
+			"padding": true,
+			"margin": true
+		},
+		"interactivity": true
+	},
+
+	"render": "file:./render.php",
+
+	"editorScript": "file:./src/index.js",
+	"viewScriptModule": "file:./src/view.js",
+	"style": "file:./src/style.css"
+}

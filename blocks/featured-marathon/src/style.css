@@ -1,269 +1,176 @@
 /**
- * RunPace – Featured Marathon Block Styles
+ * Featured Marathon Block – style.css
  */
 
-/* ── Base: hero card ───────────────────────────────────────────────────────── */
 .runpace-featured-marathon {
 	position: relative;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-	min-height: 480px;
 	border-radius: var(--wp--custom--radius--xl);
 	overflow: hidden;
-	isolation: isolate;
-	container-type: inline-size;
+	min-height: 480px;
+	display: flex;
+	align-items: flex-end;
+	color: var(--wp--preset--color--white);
 }
 
-/* ── Background image via custom property ──────────────────────────────────── */
-.runpace-featured-marathon__backdrop {
+.runpace-fm__backdrop {
 	position: absolute;
 	inset: 0;
-	background-image: var(--runpace-hero-image, none);
-	background-size: cover;
-	background-position: center;
-	z-index: -2;
-	transition: transform 600ms ease;
+	z-index: 0;
 }
 
-.runpace-featured-marathon:hover .runpace-featured-marathon__backdrop {
-	transform: scale(1.03);
+.runpace-fm__backdrop-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform var(--wp--custom--transition--slow);
 }
 
-/* Gradient fallback when no image */
-.runpace-featured-marathon__backdrop--gradient {
-	background: linear-gradient(
-		135deg,
-		var(--wp--preset--color--dark-base) 0%,
-		var(--wp--preset--color--dark-surface) 100%
-	);
+.runpace-featured-marathon:hover .runpace-fm__backdrop-img {
+	transform: scale(1.04);
 }
 
-/* Dark overlay */
-.runpace-featured-marathon::after {
-	content: '';
+.runpace-fm__overlay {
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(
-		to top,
-		rgba( 0, 0, 0, calc( var( --runpace-overlay-opacity, 0.55 ) + 0.2 ) ) 0%,
-		rgba( 0, 0, 0, var( --runpace-overlay-opacity, 0.55 ) ) 50%,
-		rgba( 0, 0, 0, 0.1 ) 100%
-	);
-	z-index: -1;
 }
 
-/* ── Content panel ─────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__content {
+.runpace-fm__content {
 	position: relative;
 	z-index: 1;
-	padding: var(--wp--preset--spacing--7) var(--wp--preset--spacing--7) var(--wp--preset--spacing--6);
+	padding: var(--wp--preset--spacing--8) var(--wp--preset--spacing--7);
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: var(--wp--preset--spacing--4);
 }
 
-/* ── Header ────────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__header {
+/* Badges */
+.runpace-fm__badges {
 	display: flex;
-	flex-direction: column;
+	gap: var(--wp--preset--spacing--2);
+	flex-wrap: wrap;
+}
+
+.runpace-fm__event-badge,
+.runpace-fm__dist-badge {
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 3px var(--wp--preset--spacing--3);
+	border-radius: var(--wp--custom--radius--pill);
+}
+
+.runpace-fm__event-badge {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--white);
+}
+
+.runpace-fm__dist-badge {
+	background: rgba(255,255,255,0.2);
+	backdrop-filter: blur(4px);
+	color: var(--wp--preset--color--white);
+	border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Title */
+.runpace-fm__title {
+	font-family: var(--wp--preset--font-family--display);
+	font-size: var(--wp--preset--font-size--5xl);
+	line-height: 1.0;
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+	margin: 0;
+}
+
+.runpace-fm__title-link {
+	color: var(--wp--preset--color--white);
+	text-decoration: none;
+	transition: opacity var(--wp--custom--transition--fast);
+}
+
+.runpace-fm__title-link:hover { opacity: 0.85; }
+
+/* Meta chips (glassmorphism) */
+.runpace-fm__meta-chips {
+	display: flex;
+	flex-wrap: wrap;
 	gap: var(--wp--preset--spacing--3);
 }
 
-/* ── Distance badge ────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__distance-badge {
+.runpace-fm__chip {
 	display: inline-flex;
-	align-self: flex-start;
-	padding: 0.3em 1em;
-	background: var(--wp--preset--color--primary);
-	color: var(--wp--preset--color--ink);
-	border-radius: var(--wp--custom--radius--pill);
-	font-size: var(--wp--preset--font-size--xs);
-	font-weight: 800;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
-}
-
-/* ── Status badge ──────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__status--past {
-	display: inline-flex;
-	align-self: flex-start;
-	padding: 0.25em 0.85em;
-	background: rgba( 255,255,255,0.15 );
-	color: rgba( 255,255,255,0.7 );
-	border-radius: var(--wp--custom--radius--pill);
-	font-size: var(--wp--preset--font-size--xs);
-	font-weight: 600;
-	letter-spacing: 0.06em;
-	text-transform: uppercase;
-	backdrop-filter: blur(4px);
-}
-
-/* ── Title ─────────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__title {
-	font-family: var(--wp--preset--font-family--display) !important;
-	font-size: var(--wp--preset--font-size--5xl) !important;
-	font-weight: 400 !important;
-	line-height: 1.0 !important;
-	text-transform: uppercase !important;
-	color: #fff !important;
-	margin: 0 !important;
-	text-shadow: 0 2px 20px rgba(0,0,0,0.3);
-}
-
-/* ── Location ──────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__location {
-	display: flex;
 	align-items: center;
-	gap: 0.4em;
-	color: rgba(255,255,255,0.8);
-	font-size: var(--wp--preset--font-size--md);
-	font-weight: 500;
-	margin: 0;
-}
-
-/* ── Excerpt ───────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__excerpt {
-	color: rgba(255,255,255,0.75);
-	font-size: var(--wp--preset--font-size--md);
-	line-height: 1.6;
-	margin: 0;
-	max-width: 60ch;
-}
-
-/* ── Meta row ──────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__meta {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--wp--preset--spacing--4);
-}
-
-.runpace-featured-marathon__meta-item {
-	display: flex;
-	align-items: center;
-	gap: 0.4em;
-	background: rgba(255,255,255,0.12);
+	gap: var(--wp--preset--spacing--2);
+	background: rgba(255,255,255,0.15);
 	backdrop-filter: blur(8px);
-	border: 1px solid rgba(255,255,255,0.15);
-	border-radius: var(--wp--custom--radius--md);
-	padding: 0.4em 0.9em;
-}
-
-.runpace-featured-marathon__meta-icon {
-	font-size: 0.9em;
-}
-
-.runpace-featured-marathon__meta-value {
-	color: #fff;
+	border: 1px solid rgba(255,255,255,0.25);
+	border-radius: var(--wp--custom--radius--pill);
 	font-size: var(--wp--preset--font-size--sm);
-	font-weight: 600;
+	font-weight: 500;
+	color: var(--wp--preset--color--white);
+	padding: var(--wp--preset--spacing--2) var(--wp--preset--spacing--4);
 }
 
-/* ── Countdown ─────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__countdown {
-	display: flex;
+/* Countdown */
+.runpace-fm__countdown {
+	display: inline-flex;
 	align-items: baseline;
 	gap: var(--wp--preset--spacing--2);
 }
 
-.runpace-featured-marathon__countdown-number {
+.runpace-fm__countdown-num {
 	font-family: var(--wp--preset--font-family--display);
 	font-size: var(--wp--preset--font-size--6xl);
-	color: var(--wp--preset--color--primary);
 	line-height: 1;
+	color: var(--wp--preset--color--primary);
 }
 
-.runpace-featured-marathon__countdown-label {
+.runpace-fm__countdown-lbl {
 	font-size: var(--wp--preset--font-size--lg);
-	color: rgba(255,255,255,0.7);
 	font-weight: 500;
+	color: var(--wp--preset--color--white);
+	opacity: 0.85;
 }
 
-/* ── Action buttons ────────────────────────────────────────────────────────── */
-.runpace-featured-marathon__actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--wp--preset--spacing--3);
-	margin-top: var(--wp--preset--spacing--2);
-}
-
-.runpace-featured-marathon__cta {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--wp--preset--spacing--2);
-	padding: var(--wp--preset--spacing--3) var(--wp--preset--spacing--6);
-	border-radius: var(--wp--custom--radius--pill);
+.runpace-fm__past-label {
+	display: inline-block;
+	background: rgba(255,255,255,0.2);
 	font-size: var(--wp--preset--font-size--sm);
-	font-weight: 700;
-	letter-spacing: 0.05em;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: var(--wp--preset--spacing--2) var(--wp--preset--spacing--4);
+	border-radius: var(--wp--custom--radius--pill);
+}
+
+/* CTAs */
+.runpace-fm__ctas {
+	display: flex;
+	gap: var(--wp--preset--spacing--4);
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.runpace-fm__btn--primary {
+	transition: background var(--wp--custom--transition--fast), transform var(--wp--custom--transition--fast);
+}
+
+.runpace-fm__btn--primary:hover { transform: translateY(-2px); }
+
+.runpace-fm__btn--secondary {
+	color: var(--wp--preset--color--white);
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 600;
+	letter-spacing: 0.04em;
 	text-transform: uppercase;
 	text-decoration: none;
-	transition: all var(--wp--custom--transition--fast);
+	border-bottom: 2px solid rgba(255,255,255,0.5);
+	padding-bottom: 2px;
+	transition: border-color var(--wp--custom--transition--fast);
 }
 
-.runpace-featured-marathon__cta--primary {
-	background: var(--wp--preset--color--primary);
-	color: var(--wp--preset--color--ink);
-}
-
-.runpace-featured-marathon__cta--primary:hover,
-.runpace-featured-marathon__cta--primary:focus-visible {
-	background: var(--wp--preset--color--primary-dark);
-	color: var(--wp--preset--color--ink);
-	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(11,218,122,0.4);
-}
-
-.runpace-featured-marathon__cta--secondary {
-	background: rgba(255,255,255,0.12);
-	color: #fff;
-	border: 1px solid rgba(255,255,255,0.25);
-	backdrop-filter: blur(6px);
-}
-
-.runpace-featured-marathon__cta--secondary:hover,
-.runpace-featured-marathon__cta--secondary:focus-visible {
-	background: rgba(255,255,255,0.22);
-	color: #fff;
-}
-
-/* ── Past state ────────────────────────────────────────────────────────────── */
-.runpace-featured-marathon--past::after {
-	background: linear-gradient(
-		to top,
-		rgba(0,0,0,0.8) 0%,
-		rgba(0,0,0,0.65) 60%,
-		rgba(0,0,0,0.25) 100%
-	);
-}
-
-.runpace-featured-marathon--past .runpace-featured-marathon__backdrop {
-	filter: grayscale(60%);
-}
-
-/* ── Container query: narrow cards ────────────────────────────────────────── */
-@container ( max-width: 480px ) {
-	.runpace-featured-marathon__title {
-		font-size: var(--wp--preset--font-size--4xl) !important;
-	}
-
-	.runpace-featured-marathon__content {
-		padding: var(--wp--preset--spacing--5);
-	}
-
-	.runpace-featured-marathon__countdown-number {
-		font-size: var(--wp--preset--font-size--5xl);
-	}
-}
-
-/* ── Placeholder (editor) ──────────────────────────────────────────────────── */
-.runpace-featured-marathon--placeholder {
-	min-height: auto;
-	background: var(--wp--preset--color--surface);
-	border: 2px dashed var(--wp--preset--color--border);
-	align-items: center;
-	justify-content: center;
-	padding: var(--wp--preset--spacing--6);
-	color: var(--wp--preset--color--ink-muted);
-	font-size: var(--wp--preset--font-size--sm);
+.runpace-fm__btn--secondary:hover {
+	border-color: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--white);
 }

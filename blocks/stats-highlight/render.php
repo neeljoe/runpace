@@ -1,95 +1,63 @@
 <?php
 /**
- * RunPace – Stats Highlight Block
- *
- * Renders a row/grid of bold numeric stats with labels and optional icons.
- * Supports four visual themes (light, dark, brand, transparent).
- * Uses Intersection Observer via a tiny viewScript for count-up animation.
+ * Stats Highlight Block – render.php
  *
  * @package RunPace
- * @since   1.0.0
  */
 
 declare( strict_types=1 );
 
-// ── Attributes ────────────────────────────────────────────────────────────────
-$stats         = $attributes['stats']        ?? [];
-$layout        = in_array( $attributes['layout'] ?? 'grid', [ 'grid', 'row', 'stacked' ], true )
-	? $attributes['layout']
-	: 'grid';
-$theme         = in_array( $attributes['theme'] ?? 'dark', [ 'light', 'dark', 'brand', 'transparent' ], true )
-	? $attributes['theme']
-	: 'dark';
-$text_align    = in_array( $attributes['textAlign'] ?? 'center', [ 'left', 'center', 'right' ], true )
-	? $attributes['textAlign']
-	: 'center';
-$show_dividers = ! empty( $attributes['showDividers'] );
+$stats           = $attributes['stats']           ?? [];
+$theme           = $attributes['theme']           ?? 'dark';
+$animate         = $attributes['animateOnScroll'] ?? true;
 
-// Sanitise stats.
-$clean_stats = [];
-foreach ( (array) $stats as $stat ) {
-	$clean_stats[] = [
-		'value' => sanitize_text_field( $stat['value'] ?? '' ),
-		'label' => sanitize_text_field( $stat['label'] ?? '' ),
-		'icon'  => sanitize_text_field( $stat['icon']  ?? '' ),
-	];
-}
-
-if ( empty( $clean_stats ) ) {
+if ( empty( $stats ) ) {
 	return;
 }
 
-// ── Wrapper ───────────────────────────────────────────────────────────────────
-$wrapper_attrs = get_block_wrapper_attributes(
+// Prime Interactivity state for scroll-reveal.
+if ( $animate ) {
+	wp_interactivity_state(
+		'runpace/stats-highlight',
+		[ 'revealed' => false ]
+	);
+}
+
+$wrapper_attributes = get_block_wrapper_attributes(
 	[
-		'class'            => implode( ' ', array_filter( [
-			'runpace-stats-highlight',
-			"runpace-stats-highlight--{$theme}",
-			"runpace-stats-highlight--{$layout}",
-			"runpace-stats-highlight--align-{$text_align}",
-			$show_dividers ? 'runpace-stats-highlight--dividers' : '',
-		] ) ),
-		'data-wp-interactive' => 'runpace/stats-highlight',
+		'class'                 => "runpace-stats runpace-stats--{$theme}",
+		'data-wp-interactive'   => $animate ? 'runpace/stats-highlight' : null,
+		'data-wp-class--is-revealed' => $animate ? 'state.revealed' : null,
 	]
 );
-
-$count = count( $clean_stats );
 ?>
-<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 
-	<ul
-		class="runpace-stats-highlight__list"
-		style="--runpace-stat-count: <?php echo esc_attr( (string) $count ); ?>;"
-		role="list"
-	>
-		<?php foreach ( $clean_stats as $index => $stat ) :
-			if ( ! $stat['value'] ) continue;
+	<?php if ( $animate ) : ?>
+	<div
+		class="runpace-stats__observer-target"
+		data-wp-on--intersect="callbacks.onIntersect"
+		aria-hidden="true"
+	></div>
+	<?php endif; ?>
+
+	<ul class="runpace-stats__list" role="list">
+		<?php foreach ( $stats as $index => $stat ) :
+			$value = $stat['value'] ?? '';
+			$label = $stat['label'] ?? '';
+			$icon  = $stat['icon']  ?? '';
+			if ( ! $value && ! $label ) continue;
 		?>
-			<li
-				class="runpace-stats-highlight__item"
-				data-wp-init="callbacks.initItem"
-				data-stat-value="<?php echo esc_attr( $stat['value'] ); ?>"
-			>
-				<?php if ( $stat['icon'] ) : ?>
-					<span class="runpace-stats-highlight__icon" aria-hidden="true">
-						<?php echo esc_html( $stat['icon'] ); ?>
-					</span>
-				<?php endif; ?>
-
-				<strong
-					class="runpace-stats-highlight__value"
-					data-wp-text="state.stats[<?php echo esc_attr( (string) $index ); ?>].display"
-				>
-					<?php echo esc_html( $stat['value'] ); ?>
-				</strong>
-
-				<?php if ( $stat['label'] ) : ?>
-					<span class="runpace-stats-highlight__label">
-						<?php echo esc_html( $stat['label'] ); ?>
-					</span>
-				<?php endif; ?>
-
-			</li>
+		<li
+			class="runpace-stats__item"
+			style="--item-index: <?php echo esc_attr( (string) $index ); ?>;"
+		>
+			<?php if ( $icon ) : ?>
+			<span class="runpace-stats__icon" aria-hidden="true"><?php echo esc_html( $icon ); ?></span>
+			<?php endif; ?>
+			<span class="runpace-stats__value"><?php echo esc_html( $value ); ?></span>
+			<span class="runpace-stats__label"><?php echo esc_html( $label ); ?></span>
+		</li>
 		<?php endforeach; ?>
 	</ul>
 

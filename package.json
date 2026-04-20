@@ -1,0 +1,23 @@
+{
+	"name": "runpace",
+	"version": "1.0.0",
+	"description": "RunPace WordPress Block Theme",
+	"private": true,
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"lint:js": "wp-scripts lint-js",
+		"lint:css": "wp-scripts lint-style",
+		"format": "wp-scripts format",
+		"packages-update": "wp-scripts packages-update"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.0.0"
+	},
+	"dependencies": {
+		"@wordpress/interactivity": "^6.0.0"
+	},
+	"wp-scripts": {
+		"webpack-config": "node_modules/@wordpress/scripts/config/webpack.config.js"
+	}
+}

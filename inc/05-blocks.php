@@ -2,13 +2,11 @@
 /**
  * RunPace – Block Registration
  *
- * Registers all custom RunPace blocks using register_block_type() with
- * block.json metadata. WordPress reads `render`, `style`, `editorStyle`,
- * and `editorScript` automatically from block.json, so this file only
- * needs to call register_block_type() once per block.
+ * Registers all custom blocks from the blocks/ directory.
+ * Each block is discovered via its block.json file.
  *
- * Load order: called after CPTs (01) and taxonomies (02) are registered,
- * so any render callbacks that query CPT data work on the first load.
+ * Also registers Query Loop variations on the server so they
+ * appear in the editor without a client-side build step.
  *
  * @package RunPace
  * @since   1.0.0
@@ -20,70 +18,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// ─── Register Custom Blocks ───────────────────────────────────────────────────
+
 /**
- * Register all RunPace custom blocks.
- *
- * Each block is registered from its own directory using block.json.
- * WordPress resolves all asset handles (style, editorStyle, editorScript,
- * viewScript, render) relative to the block's directory.
+ * Register all blocks in the /blocks directory.
+ * Each sub-directory must contain a valid block.json.
  */
 function runpace_register_blocks(): void {
 
-	/**
-	 * Block definitions.
-	 *
-	 * Key   = block directory name (relative to blocks/).
-	 * Value = optional args array merged into register_block_type().
-	 *         For most blocks, block.json alone is sufficient.
-	 */
-	$blocks = [
+	$blocks_dir = RUNPACE_DIR . '/blocks';
+	$block_dirs = glob( $blocks_dir . '/*/block.json' );
 
-		// ── Marathon Info ─────────────────────────────────────────────────────
-		// Displays race metadata pulled from post meta.
-		// Works on single marathon pages and inside Query Loop.
-		'marathon-info'       => [],
+	if ( ! $block_dirs ) {
+		return;
+	}
 
-		// ── Featured Marathon ──────────────────────────────────────────────────
-		// Hero-style card; auto-queries for a featured marathon or uses
-		// a specific post selected via the editor post picker.
-		'featured-marathon'   => [],
-
-		// ── Training Plan Card ─────────────────────────────────────────────────
-		// Compact card for training-plan posts. Designed for Query Loop grids.
-		'training-plan-card'  => [],
-
-		// ── Stats Highlight ────────────────────────────────────────────────────
-		// Static stats strip (e.g. "42KM", "10,000+ runners").
-		// Uses Interactivity API for scroll-triggered entrance animation.
-		'stats-highlight'     => [],
-
-	];
-
-	foreach ( $blocks as $block_name => $extra_args ) {
-
-		$block_dir = RUNPACE_DIR . '/blocks/' . $block_name;
-
-		if ( ! is_dir( $block_dir ) ) {
-			// Log a notice in debug mode; don't fatally error in production.
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions
-				trigger_error(
-					sprintf( 'RunPace: block directory not found: %s', esc_html( $block_dir ) ),
-					E_USER_NOTICE
-				);
-			}
-			continue;
-		}
-
-		$result = register_block_type( $block_dir, $extra_args );
-
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && false === $result ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions
-			trigger_error(
-				sprintf( 'RunPace: failed to register block: %s', esc_html( $block_name ) ),
-				E_USER_NOTICE
-			);
-		}
+	foreach ( $block_dirs as $block_json ) {
+		register_block_type( dirname( $block_json ) );
 	}
 }
 add_action( 'init', 'runpace_register_blocks' );
@@ -91,130 +42,121 @@ add_action( 'init', 'runpace_register_blocks' );
 // ─── Query Loop Variations ────────────────────────────────────────────────────
 
 /**
- * Register custom Query Loop block variations for RunPace CPTs.
- *
- * These appear in the Query Loop block's Pattern Chooser as pre-configured
- * starting points.
- *
- * Note: variations are registered client-side (JS) for full block editor
- * support. The filter below registers them server-side so REST responses
- * include the variation names.
- *
- * @param  array $variations Existing variations.
- * @return array
+ * Enqueue the block variations script in the block editor.
+ * This registers client-side Query Loop variations for the inserter.
  */
-function runpace_query_loop_variations( array $variations ): array {
+function runpace_enqueue_editor_assets(): void {
 
-	$runpace_variations = [
+	$asset_file = RUNPACE_DIR . '/assets/js/block-variations.asset.php';
+	$version    = file_exists( $asset_file )
+		? require $asset_file
+		: [ 'dependencies' => [ 'wp-blocks', 'wp-element', 'wp-i18n' ], 'version' => RUNPACE_VERSION ];
 
-		[
-			'name'        => 'runpace-upcoming-marathons',
-			'title'       => __( 'Upcoming Marathons', 'runpace' ),
-			'description' => __( 'A grid of upcoming marathon events ordered by race date.', 'runpace' ),
-			'icon'        => 'location-alt',
-			'category'    => 'runpace',
-			'isActive'    => [ 'query.postType', 'query.orderBy' ],
-			'attributes'  => [
-				'query' => [
-					'postType'  => 'marathon',
-					'orderBy'   => 'meta_value',
-					'order'     => 'ASC',
-					'perPage'   => 6,
-					'metaKey'   => '_runpace_race_date',
-					'metaQuery' => [
-						'relation' => 'AND',
-						[
-							'key'     => '_runpace_race_date',
-							'value'   => gmdate( 'Y-m-d' ),
-							'compare' => '>=',
-							'type'    => 'DATE',
-						],
-					],
-					'inherit'  => false,
-				],
-				'layout' => [
-					'type'        => 'grid',
-					'columnCount' => 3,
-				],
-			],
-		],
-
-		[
-			'name'        => 'runpace-featured-marathons',
-			'title'       => __( 'Featured Marathons', 'runpace' ),
-			'description' => __( 'Shows marathons marked as featured.', 'runpace' ),
-			'icon'        => 'awards',
-			'category'    => 'runpace',
-			'isActive'    => [ 'query.postType' ],
-			'attributes'  => [
-				'query' => [
-					'postType'  => 'marathon',
-					'orderBy'   => 'date',
-					'order'     => 'DESC',
-					'perPage'   => 3,
-					'metaQuery' => [
-						[
-							'key'   => '_runpace_is_featured',
-							'value' => '1',
-						],
-					],
-					'inherit'  => false,
-				],
-				'layout' => [
-					'type'        => 'grid',
-					'columnCount' => 3,
-				],
-			],
-		],
-
-		[
-			'name'        => 'runpace-training-plans',
-			'title'       => __( 'Training Plans Grid', 'runpace' ),
-			'description' => __( 'A grid of training plans ordered by duration.', 'runpace' ),
-			'icon'        => 'clipboard',
-			'category'    => 'runpace',
-			'isActive'    => [ 'query.postType' ],
-			'attributes'  => [
-				'query' => [
-					'postType'  => 'training-plan',
-					'orderBy'   => 'meta_value_num',
-					'order'     => 'ASC',
-					'perPage'   => 6,
-					'metaKey'   => '_runpace_duration_weeks',
-					'inherit'   => false,
-				],
-				'layout' => [
-					'type'        => 'grid',
-					'columnCount' => 3,
-				],
-			],
-		],
-
-	];
-
-	return array_merge( $variations, $runpace_variations );
-}
-add_filter( 'block_type_metadata_settings', static function ( array $settings, array $metadata ): array {
-	if ( 'core/query' === ( $metadata['name'] ?? '' ) ) {
-		add_filter( 'blocks.registerBlockType', 'runpace_query_loop_client_variations', 10, 2 );
-	}
-	return $settings;
-}, 10, 2 );
-
-/**
- * Enqueue the JS that registers Query Loop variations client-side.
- * This is the correct, supported method for block variations in WP 6.x.
- */
-function runpace_enqueue_block_variations(): void {
-
-	wp_register_script(
+	wp_enqueue_script(
 		'runpace-block-variations',
 		RUNPACE_ASSETS . '/js/block-variations.js',
-		[ 'wp-blocks', 'wp-dom-ready', 'wp-i18n' ],
-		RUNPACE_VERSION,
+		$version['dependencies'] ?? [ 'wp-blocks', 'wp-element', 'wp-i18n' ],
+		$version['version'] ?? RUNPACE_VERSION,
 		true
 	);
-
-	wp_enqueue_block_editor_assets( 'runpace-block-variations' );
 }
-add_action( 'enqueue_block_editor_assets', 'runpace_enqueue_block_variations' );
+add_action( 'enqueue_block_editor_assets', 'runpace_enqueue_editor_assets' );
+
+// ─── Interactivity API: Marathon Filter State ─────────────────────────────────
+
+/**
+ * Prime the server-side state for the marathon filter block.
+ * Called during the render phase so wp_interactivity_state() is available.
+ */
+function runpace_prime_filter_state(): void {
+
+	// Fetch all published marathons with their key meta for the JS store.
+	$marathons = get_posts(
+		[
+			'post_type'      => 'marathon',
+			'post_status'    => 'publish',
+			'posts_per_page' => 100,
+			'orderby'        => 'meta_value',
+			'meta_key'       => '_runpace_race_date',
+			'order'          => 'ASC',
+			'fields'         => 'ids',
+		]
+	);
+
+	$items = [];
+	foreach ( $marathons as $id ) {
+		$items[] = [
+			'id'       => $id,
+			'date'     => get_post_meta( $id, '_runpace_race_date', true ),
+			'city'     => get_post_meta( $id, '_runpace_city', true ),
+			'country'  => get_post_meta( $id, '_runpace_country', true ),
+			'price'    => (float) get_post_meta( $id, '_runpace_price', true ),
+			'distance' => wp_get_post_terms( $id, 'runpace_distance', [ 'fields' => 'names' ] ),
+		];
+	}
+
+	wp_interactivity_state(
+		'runpace/marathon-filter',
+		[
+			'allMarathons'     => $items,
+			'activeDistance'   => '',
+			'activeLocation'   => '',
+			'activeDateFilter' => 'upcoming',
+			'viewMode'         => 'grid',
+			'visibleCount'     => 9,
+			'pageSize'         => 9,
+		]
+	);
+}
+
+// ─── Block Bindings Source Registration ───────────────────────────────────────
+
+/**
+ * Register custom block bindings sources for RunPace meta fields.
+ *
+ * This allows editors to bind core blocks (Paragraph, Heading, Image)
+ * directly to post meta via the Block Bindings API without custom render.php.
+ */
+function runpace_register_bindings(): void {
+
+	if ( ! function_exists( 'register_block_bindings_source' ) ) {
+		return; // WordPress < 6.5 fallback.
+	}
+
+	register_block_bindings_source(
+		'runpace/meta',
+		[
+			'label'              => __( 'RunPace Meta', 'runpace' ),
+			'get_value_callback' => static function ( array $source_args, \WP_Block $block ): string {
+				$post_id = $block->context['postId'] ?? get_the_ID();
+				$key     = $source_args['key'] ?? '';
+
+				if ( ! $post_id || ! $key ) {
+					return '';
+				}
+
+				$value = get_post_meta( $post_id, $key, true );
+
+				// Format specific fields for display.
+				if ( '_runpace_price' === $key ) {
+					return $value ? '$' . number_format( (float) $value, 0 ) : __( 'Free', 'runpace' );
+				}
+
+				if ( '_runpace_race_date' === $key ) {
+					$ts = strtotime( (string) $value );
+					return $ts ? date_i18n( get_option( 'date_format' ), $ts ) : (string) $value;
+				}
+
+				if ( '_runpace_duration_weeks' === $key ) {
+					$weeks = (int) $value;
+					/* translators: %d = number of weeks */
+					return $weeks ? sprintf( _n( '%d week', '%d weeks', $weeks, 'runpace' ), $weeks ) : '';
+				}
+
+				return esc_html( (string) $value );
+			},
+			'uses_context'       => [ 'postId', 'postType' ],
+		]
+	);
+}
+add_action( 'init', 'runpace_register_bindings' );

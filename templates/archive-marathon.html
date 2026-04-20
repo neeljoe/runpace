@@ -1,0 +1,44 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group">
+
+	<!-- ── Archive Hero ────────────────────────────────────────────────────── -->
+	<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|9","bottom":"var:preset|spacing|8"}},"color":{"background":"var:preset|color|dark-base"}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group has-dark-base-background-color has-background">
+
+		<!-- wp:group {"layout":{"type":"constrained","contentSize":"720px"}} -->
+		<div class="wp-block-group">
+
+			<!-- wp:paragraph {"style":{"color":{"text":"var:preset|color|primary"},"typography":{"fontSize":"var:preset|font-size|xs","fontWeight":"700","letterSpacing":"0.1em","textTransform":"uppercase"},"spacing":{"margin":{"bottom":"var:preset|spacing|3"}}}} -->
+			<p class="has-text-color" style="margin-bottom:0">🏃 RACE DIRECTORY</p>
+			<!-- /wp:paragraph -->
+
+			<!-- wp:query-title {"type":"archive","style":{"color":{"text":"var:preset|color|white"},"typography":{"fontSize":"var:preset|font-size|6xl","textTransform":"uppercase","fontFamily":"var:preset|font-family|display","lineHeight":"1"},"spacing":{"margin":{"top":"var:preset|spacing|3"}}}} /-->
+
+			<!-- wp:paragraph {"style":{"color":{"text":"var:preset|color|ink-muted"},"typography":{"fontSize":"var:preset|font-size|lg"},"spacing":{"margin":{"top":"var:preset|spacing|4"}}}} -->
+			<p class="has-text-color">Find and register for marathons, half marathons, trail runs, and ultra events worldwide.</p>
+			<!-- /wp:paragraph -->
+
+		</div>
+		<!-- /wp:group -->
+
+	</div>
+	<!-- /wp:group -->
+
+	<!-- ── Stats Strip ─────────────────────────────────────────────────────── -->
+	<!-- wp:runpace/stats-highlight {"theme":"primary","animateOnScroll":false,"stats":[{"value":"200+","label":"Race events","icon":"🏅"},{"value":"50","label":"Countries","icon":"🌍"},{"value":"5","label":"Distances","icon":"🏃"},{"value":"Free","label":"To browse","icon":"✅"}]} /-->
+
+	<!-- ── Interactive Filter + Listings ──────────────────────────────────── -->
+	<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|8","bottom":"var:preset|spacing|10"}}},"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group">
+
+		<!-- wp:runpace/marathon-filter {"postsPerPage":9,"showDistanceFilter":true,"showLocationFilter":true,"showDateFilter":true,"showViewToggle":true,"defaultView":"grid"} /-->
+
+	</div>
+	<!-- /wp:group -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

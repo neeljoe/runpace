@@ -5,80 +5,34 @@
 	"version": "1.0.0",
 	"title": "Stats Highlight",
 	"category": "runpace",
-	"icon": "chart-bar",
-	"description": "A visually bold stats strip — e.g. '42KM', '10,000+ runners', '50 countries'. Perfect for hero sections and landing pages.",
-	"keywords": [ "stats", "numbers", "highlight", "counter", "achievements" ],
+	"description": "Animated stats strip: e.g. 42KM · 10,000+ runners · 50 countries.",
+	"keywords": [ "stats", "numbers", "highlight", "counter" ],
 	"textdomain": "runpace",
-	"example": {
-		"attributes": {
-			"stats": [
-				{ "value": "42KM",    "label": "Full marathon",    "icon": "🏃" },
-				{ "value": "10,000+", "label": "Runners joined",   "icon": "👥" },
-				{ "value": "50",      "label": "Countries",        "icon": "🌍" },
-				{ "value": "98%",     "label": "Finish rate",      "icon": "🏅" }
-			]
-		}
-	},
-
 	"attributes": {
 		"stats": {
 			"type": "array",
 			"default": [
-				{ "value": "42KM",    "label": "Full marathon",    "icon": "🏃" },
-				{ "value": "10,000+", "label": "Runners joined",   "icon": "👥" },
-				{ "value": "50",      "label": "Countries",        "icon": "🌍" },
-				{ "value": "98%",     "label": "Finish rate",      "icon": "🏅" }
-			],
-			"items": {
-				"type": "object",
-				"properties": {
-					"value": { "type": "string" },
-					"label": { "type": "string" },
-					"icon":  { "type": "string" }
-				}
-			}
-		},
-		"layout": {
-			"type":    "string",
-			"default": "grid",
-			"enum":    [ "grid", "row", "stacked" ]
+				{ "value": "42KM",    "label": "Full marathon", "icon": "🏃" },
+				{ "value": "10K+",    "label": "Runners listed", "icon": "👥" },
+				{ "value": "50",      "label": "Countries",      "icon": "🌍" },
+				{ "value": "200+",    "label": "Race events",    "icon": "🏅" }
+			]
 		},
 		"theme": {
-			"type":    "string",
+			"type": "string",
 			"default": "dark",
-			"enum":    [ "light", "dark", "brand", "transparent" ]
+			"enum": [ "dark", "light", "primary", "split" ]
 		},
-		"textAlign": {
-			"type":    "string",
-			"default": "center"
-		},
-		"showDividers": {
-			"type":    "boolean",
-			"default": true
-		}
+		"animateOnScroll": { "type": "boolean", "default": true }
 	},
-
 	"supports": {
-		"html":  false,
-		"align": [ "wide", "full" ],
-		"color": {
-			"background": true,
-			"text":       true,
-			"gradients":  true
-		},
-		"spacing": {
-			"padding": true,
-			"margin":  true
-		},
-		"typography": {
-			"fontSize": false
-		},
-		"anchor": true
+		"html": false,
+		"color": { "background": true, "text": true },
+		"spacing": { "padding": true, "margin": true },
+		"interactivity": true
 	},
-
-	"style":        "file:./build/style.css",
-	"editorStyle":  "file:./build/editor.css",
-	"editorScript": "file:./build/index.js",
-	"render":       "file:./render.php",
-	"viewScript":   "file:./build/view.js"
+	"render": "file:./render.php",
+	"editorScript": "file:./src/index.js",
+	"viewScriptModule": "file:./src/view.js",
+	"style": "file:./src/style.css"
 }

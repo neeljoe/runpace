@@ -1,0 +1,367 @@
+/**
+ * Marathon Filter Block – style.css
+ * All layout and visual rules. Zero hardcoded values.
+ */
+
+/* ── Controls bar ──────────────────────────────────────────────────────────── */
+.runpace-mf__controls {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--4);
+	margin-block-end: var(--wp--preset--spacing--7);
+	padding: var(--wp--preset--spacing--5);
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--custom--radius--lg);
+	box-shadow: var(--wp--preset--shadow--sm);
+}
+
+.runpace-mf__filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--4);
+}
+
+.runpace-mf__filter-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--2);
+	flex: 1 1 160px;
+}
+
+.runpace-mf__filter-label {
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--ink-muted);
+}
+
+.runpace-mf__select {
+	padding: var(--wp--preset--spacing--3) var(--wp--preset--spacing--4);
+	background: var(--wp--preset--color--base);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--md);
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink);
+	cursor: pointer;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A7973' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right var(--wp--preset--spacing--4) center;
+	padding-right: var(--wp--preset--spacing--8);
+	transition: border-color var(--wp--custom--transition--fast);
+}
+
+.runpace-mf__select:focus {
+	outline: 2px solid var(--wp--preset--color--primary);
+	outline-offset: 2px;
+	border-color: var(--wp--preset--color--primary);
+}
+
+/* ── Toolbar ───────────────────────────────────────────────────────────────── */
+.runpace-mf__toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--4);
+	flex-wrap: wrap;
+}
+
+.runpace-mf__active-filters {
+	display: flex;
+	gap: var(--wp--preset--spacing--2);
+	flex-wrap: wrap;
+	flex: 1;
+}
+
+.runpace-mf__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--2);
+	background: var(--wp--preset--color--primary-light);
+	color: var(--wp--preset--color--primary-dark);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 600;
+	padding: var(--wp--preset--spacing--1) var(--wp--preset--spacing--3);
+	border-radius: var(--wp--custom--radius--pill);
+}
+
+.runpace-mf__chip-remove {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: inherit;
+	font-size: 1.1em;
+	padding: 0;
+	line-height: 1;
+}
+
+.runpace-mf__count {
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink-muted);
+	margin: 0;
+	white-space: nowrap;
+}
+
+/* ── View toggle ───────────────────────────────────────────────────────────── */
+.runpace-mf__view-toggle {
+	display: flex;
+	gap: 2px;
+	background: var(--wp--preset--color--base);
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: var(--wp--custom--radius--md);
+	padding: 3px;
+}
+
+.runpace-mf__view-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	background: none;
+	border: none;
+	border-radius: var(--wp--custom--radius--sm);
+	color: var(--wp--preset--color--ink-muted);
+	cursor: pointer;
+	transition: all var(--wp--custom--transition--fast);
+}
+
+.runpace-mf__view-btn.is-active {
+	background: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--ink);
+}
+
+/* ── Results grid / list ───────────────────────────────────────────────────── */
+.runpace-mf__results {
+	display: grid;
+	gap: var(--wp--preset--spacing--6);
+}
+
+.runpace-mf__results.is-grid {
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.runpace-mf__results.is-list {
+	grid-template-columns: 1fr;
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────── */
+.runpace-mf__card {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--custom--radius--lg);
+	box-shadow: var(--wp--preset--shadow--sm);
+	overflow: hidden;
+	transition: box-shadow var(--wp--custom--transition--base), transform var(--wp--custom--transition--base);
+	display: flex;
+	flex-direction: column;
+}
+
+.runpace-mf__card:hover {
+	box-shadow: var(--wp--preset--shadow--card-hover);
+	transform: translateY(-3px);
+}
+
+.runpace-mf__results.is-list .runpace-mf__card {
+	flex-direction: row;
+}
+
+.runpace-mf__card.is-featured {
+	border: 2px solid var(--wp--preset--color--primary);
+}
+
+.runpace-mf__card.is-past { opacity: 0.65; }
+
+.runpace-mf__card-img-wrap {
+	position: relative;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	display: block;
+}
+
+.runpace-mf__results.is-list .runpace-mf__card-img-wrap {
+	aspect-ratio: auto;
+	width: 220px;
+	flex-shrink: 0;
+}
+
+.runpace-mf__card-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform var(--wp--custom--transition--slow);
+}
+
+.runpace-mf__card:hover .runpace-mf__card-img {
+	transform: scale(1.04);
+}
+
+.runpace-mf__featured-badge {
+	position: absolute;
+	top: var(--wp--preset--spacing--3);
+	left: var(--wp--preset--spacing--3);
+	background: var(--wp--preset--color--primary);
+	color: var(--wp--preset--color--ink);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 3px var(--wp--preset--spacing--3);
+	border-radius: var(--wp--custom--radius--pill);
+}
+
+.runpace-mf__card-body {
+	padding: var(--wp--preset--spacing--5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--3);
+	flex: 1;
+}
+
+.runpace-mf__card-meta {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--3);
+	flex-wrap: wrap;
+}
+
+.runpace-mf__distance-chip {
+	background: var(--wp--preset--color--primary-light);
+	color: var(--wp--preset--color--primary-dark);
+	font-size: var(--wp--preset--font-size--xs);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 2px var(--wp--preset--spacing--3);
+	border-radius: var(--wp--custom--radius--pill);
+}
+
+.runpace-mf__date {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--2);
+	font-size: var(--wp--preset--font-size--xs);
+	color: var(--wp--preset--color--ink-muted);
+}
+
+.runpace-mf__days-badge {
+	background: var(--wp--preset--color--accent-light);
+	color: var(--wp--preset--color--accent);
+	font-weight: 700;
+	padding: 1px var(--wp--preset--spacing--2);
+	border-radius: var(--wp--custom--radius--pill);
+}
+
+.runpace-mf__card-title {
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--xl);
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0;
+}
+
+.runpace-mf__card-title a {
+	color: var(--wp--preset--color--ink);
+	text-decoration: none;
+}
+
+.runpace-mf__card-title a:hover {
+	color: var(--wp--preset--color--primary-dark);
+}
+
+.runpace-mf__card-location {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--2);
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink-muted);
+	margin: 0;
+}
+
+.runpace-mf__card-excerpt {
+	font-size: var(--wp--preset--font-size--sm);
+	color: var(--wp--preset--color--ink-secondary);
+	line-height: 1.5;
+	margin: 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.runpace-mf__card-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-block-start: auto;
+	padding-block-start: var(--wp--preset--spacing--3);
+	border-top: 1px solid var(--wp--preset--color--border);
+}
+
+.runpace-mf__price {
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 700;
+	color: var(--wp--preset--color--primary-dark);
+}
+
+.runpace-mf__card-link {
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 600;
+	color: var(--wp--preset--color--ink);
+	text-decoration: none;
+	transition: color var(--wp--custom--transition--fast);
+}
+
+.runpace-mf__card-link:hover {
+	color: var(--wp--preset--color--primary-dark);
+}
+
+/* ── Empty / no-results state ──────────────────────────────────────────────── */
+.runpace-mf__empty,
+.runpace-mf__no-results {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: var(--wp--preset--spacing--9) var(--wp--preset--spacing--6);
+}
+
+.runpace-mf__no-results-icon {
+	display: block;
+	font-size: 3rem;
+	margin-block-end: var(--wp--preset--spacing--4);
+}
+
+/* ── Load More ─────────────────────────────────────────────────────────────── */
+.runpace-mf__load-more-wrap {
+	display: flex;
+	justify-content: center;
+	margin-block-start: var(--wp--preset--spacing--7);
+}
+
+.runpace-mf__load-more {
+	position: relative;
+	min-width: 160px;
+}
+
+.runpace-mf__load-more-spinner {
+	display: none;
+	width: 16px;
+	height: 16px;
+	border: 2px solid currentColor;
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: runpace-spin 0.6s linear infinite;
+}
+
+.runpace-mf__load-more.is-loading .runpace-mf__load-more-text { visibility: hidden; }
+.runpace-mf__load-more.is-loading .runpace-mf__load-more-spinner {
+	display: inline-block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+@keyframes runpace-spin {
+	to { transform: translate(-50%, -50%) rotate(360deg); }
+}

@@ -5,44 +5,25 @@
 	"version": "1.0.0",
 	"title": "Featured Marathon",
 	"category": "runpace",
-	"icon": "awards",
-	"description": "A prominent card showcasing a single featured marathon with hero image, race date countdown, distance badge, and registration CTA.",
-	"keywords": [ "marathon", "featured", "hero", "race", "card" ],
+	"description": "Hero-style featured marathon card with backdrop image, countdown, and dual CTAs.",
+	"keywords": [ "marathon", "featured", "hero", "race" ],
 	"textdomain": "runpace",
-	"usesContext": [ "postId", "postType" ],
 
 	"attributes": {
-		"postId": {
-			"type": "number",
-			"default": 0
-		},
-		"showCountdown":     { "type": "boolean", "default": true },
-		"showDistanceBadge": { "type": "boolean", "default": true },
-		"showExcerpt":       { "type": "boolean", "default": true },
-		"showMeta":          { "type": "boolean", "default": true },
-		"ctaLabel":          { "type": "string",  "default": "Register Now" },
-		"learnMoreLabel":    { "type": "string",  "default": "Learn More" },
-		"overlayOpacity": {
-			"type": "number",
-			"default": 55
-		}
+		"showCountdown": { "type": "boolean", "default": true },
+		"primaryLabel": { "type": "string", "default": "Register Now" },
+		"secondaryLabel": { "type": "string", "default": "View Details" },
+		"overlayOpacity": { "type": "number", "default": 0.55 }
 	},
+
+	"usesContext": [ "postId", "postType" ],
 
 	"supports": {
-		"html":  false,
-		"align": [ "wide", "full" ],
-		"color": {
-			"background": false,
-			"text":       false
-		},
-		"spacing": {
-			"margin": true
-		},
-		"interactivity": true
+		"html": false,
+		"interactivity": { "clientNavigation": true }
 	},
 
-	"style":        "file:./build/style.css",
-	"editorStyle":  "file:./build/editor.css",
-	"editorScript": "file:./build/index.js",
-	"render":       "file:./render.php"
+	"render": "file:./render.php",
+	"editorScript": "file:./src/index.js",
+	"style": "file:./src/style.css"
 }

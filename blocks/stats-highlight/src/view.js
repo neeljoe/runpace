@@ -1,45 +1,30 @@
 /**
- * RunPace – Stats Highlight view.js
- *
- * Interactivity API store:
- * - Triggers "is-visible" class via IntersectionObserver for CSS animation.
- * - No heavy count-up library; keeps it <1KB.
- *
- * Namespace: runpace/stats-highlight
+ * Stats Highlight – view.js
+ * Scroll-reveal animation using IntersectionObserver + Interactivity API.
  */
 
 import { store, getElement } from '@wordpress/interactivity';
 
 store( 'runpace/stats-highlight', {
+	state: {
+		revealed: false,
+	},
 	callbacks: {
-		/**
-		 * Called once per stat item when it enters the viewport.
-		 * Adds the CSS class that drives the slide-in transition defined in style.css.
-		 */
-		initItem() {
+		onIntersect() {
 			const { ref } = getElement();
 			if ( ! ref ) return;
 
-			// Skip if user prefers reduced motion.
-			const prefersReduced = window.matchMedia(
-				'(prefers-reduced-motion: reduce)'
-			).matches;
-
-			if ( prefersReduced ) {
-				ref.classList.add( 'is-visible' );
-				return;
-			}
-
 			const observer = new IntersectionObserver(
-				( entries, obs ) => {
+				( entries ) => {
 					entries.forEach( ( entry ) => {
 						if ( entry.isIntersecting ) {
-							entry.target.classList.add( 'is-visible' );
-							obs.unobserve( entry.target );
+							// Flip state — data-wp-class--is-revealed adds CSS class.
+							store( 'runpace/stats-highlight' ).state.revealed = true;
+							observer.disconnect();
 						}
 					} );
 				},
-				{ threshold: 0.2 }
+				{ threshold: 0.25 }
 			);
 
 			observer.observe( ref );
