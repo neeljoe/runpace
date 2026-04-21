@@ -14,9 +14,9 @@
 		"stats": {
 			"type": "array",
 			"default": [
-				{ "value": "42", "suffix": "KM", "label": "Full marathon distance" },
-				{ "value": "10,000", "suffix": "+", "label": "Runners in our community" },
-				{ "value": "120", "suffix": "", "label": "Marathons listed" }
+				{ "value": "42",     "suffix": "KM", "label": "Full marathon distance" },
+				{ "value": "10,000", "suffix": "+",  "label": "Runners in our community" },
+				{ "value": "120",    "suffix": "",   "label": "Marathons listed" }
 			],
 			"items": {
 				"type": "object",
@@ -27,45 +27,22 @@
 				}
 			}
 		},
-		"align": {
-			"type": "string",
-			"default": "wide"
-		},
-		"animationEnabled": {
-			"type": "boolean",
-			"default": true
-		},
-		"columns": {
-			"type": "integer",
-			"default": 3,
-			"minimum": 1,
-			"maximum": 6
-		}
+		"align":             { "type": "string",  "default": "wide" },
+		"animationEnabled": { "type": "boolean", "default": true },
+		"columns":          { "type": "integer", "default": 3, "minimum": 1, "maximum": 6 }
 	},
 
 	"supports": {
 		"html": false,
-		"align": [ "wide", "full" ],
-		"color": {
-			"background": true,
-			"text": true,
-			"gradients": true
-		},
-		"spacing": {
-			"padding": true,
-			"margin": [ "top", "bottom" ],
-			"blockGap": true
-		},
+		"align":   [ "wide", "full" ],
+		"color":   { "background": true, "text": true, "gradients": true },
+		"spacing": { "padding": true, "margin": [ "top", "bottom" ], "blockGap": true },
 		"interactivity": true
 	},
 
-	"render": "file:./render.php",
-
-	"editorScript": "file:./build/index.js",
-
+	"render":           "file:./render.php",
+	"editorScript":     "file:./build/index.js",
+	"editorStyle":      "file:./build/index.css",
 	"viewScriptModule": "file:./build/view.js",
-
-	"style": "file:./build/style-index.css",
-
-	"editorStyle": "file:./build/index.css"
+	"style":            "file:./build/style-index.css"
 }

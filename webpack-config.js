@@ -1,25 +1,33 @@
 /**
  * RunPace – Webpack configuration
  *
- * Extends @wordpress/scripts defaults to:
- *   1. Build all four custom blocks from their src/ directories.
- *   2. Build the block-variations editor script.
- *   3. Output to each block's own build/ directory so block.json
- *      can reference `file:./build/index.js` etc.
+ * Extends @wordpress/scripts defaults to build all five custom blocks
+ * and the shared block-variations editor script.
+ *
+ * Each block outputs to its own build/ directory so block.json can
+ * reference  "file:./build/index.js"  etc.
+ *
+ * Compatible with @wordpress/scripts v27–v30+ (webpack-cli v5).
  *
  * Usage:
  *   npm run build    → production build
  *   npm run start    → development watch
+ *
+ * ── Why we use a custom config ────────────────────────────────────────────
+ * The default wp-scripts entry point discovery reads from src/index.js in
+ * the project root. We have multiple blocks each with their own src/ and
+ * build/ directories, so we override `entry` to list every entry point
+ * explicitly and override `output.path` to the theme root so the relative
+ * directory structure is preserved.
  */
 
-const path                     = require( 'path' );
-const defaultConfig            = require( '@wordpress/scripts/config/webpack.config' );
-const { getWebpackEntryPoints } = require( '@wordpress/scripts/utils/config' );
+const path         = require( 'path' );
+const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 /**
- * Helper — resolves a path relative to this config file.
+ * Resolve a path relative to this config file (theme root).
  *
- * @param  {...string} segments Path segments.
+ * @param {...string} segments
  * @returns {string}
  */
 const r = ( ...segments ) => path.resolve( __dirname, ...segments );
@@ -27,15 +35,6 @@ const r = ( ...segments ) => path.resolve( __dirname, ...segments );
 module.exports = {
 	...defaultConfig,
 
-	/**
-	 * Multiple entry points — one per block (editor + view) plus
-	 * the shared block-variations script.
-	 *
-	 * wp-scripts uses `entry` to determine output filenames:
-	 *   key "blocks/marathon-filter/index" → build/blocks/marathon-filter/index.js
-	 *
-	 * We override the output.path to the theme root so relative paths work.
-	 */
 	entry: {
 		// ── Block: marathon-filter ─────────────────────────────────────────
 		'blocks/marathon-filter/build/index': r( 'blocks/marathon-filter/src/index.js' ),
@@ -54,25 +53,18 @@ module.exports = {
 		'blocks/stats-highlight/build/index': r( 'blocks/stats-highlight/src/index.js' ),
 		'blocks/stats-highlight/build/view':  r( 'blocks/stats-highlight/src/view.js' ),
 
-		// ── Shared: block variations (loaded in editor) ────────────────────
+		// ── Shared: block variations (editor only) ─────────────────────────
 		'assets/js/build/block-variations': r( 'assets/js/block-variations.js' ),
 	},
 
 	output: {
 		...defaultConfig.output,
-		// Output directly to theme root so block.json relative paths resolve.
+		// Output to theme root so entry key paths resolve correctly.
+		// e.g. entry key 'blocks/marathon-filter/build/index'
+		//   → <theme-root>/blocks/marathon-filter/build/index.js
 		path: r( '.' ),
-		// Preserve the entry key directory structure.
 		filename: '[name].js',
-		// Module output for viewScriptModule entries.
+		// Async chunks land in assets/js/chunks/ to keep block dirs clean.
 		chunkFilename: 'assets/js/chunks/[name].[contenthash].js',
 	},
-
-	module: {
-		...defaultConfig.module,
-	},
-
-	plugins: [
-		...defaultConfig.plugins,
-	],
 };

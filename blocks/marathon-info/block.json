@@ -10,48 +10,24 @@
 	"textdomain": "runpace",
 
 	"attributes": {
-		"layout": {
-			"type": "string",
-			"default": "grid",
-			"enum": [ "grid", "compact", "hero" ]
-		},
-		"showCountdown": {
-			"type": "boolean",
-			"default": true
-		},
-		"showRegisterButton": {
-			"type": "boolean",
-			"default": true
-		},
-		"registerLabel": {
-			"type": "string",
-			"default": "Register Now"
-		},
-		"accentColor": {
-			"type": "string",
-			"default": "primary"
-		}
+		"layout":             { "type": "string",  "default": "grid", "enum": [ "grid", "compact", "hero" ] },
+		"showCountdown":      { "type": "boolean", "default": true },
+		"showRegisterButton": { "type": "boolean", "default": true },
+		"registerLabel":      { "type": "string",  "default": "Register Now" },
+		"accentColor":        { "type": "string",  "default": "primary" }
 	},
 
 	"usesContext": [ "postId", "postType" ],
 
 	"supports": {
 		"html": false,
-		"color": {
-			"background": true,
-			"text": true
-		},
-		"spacing": {
-			"padding": true,
-			"margin": true
-		},
-		"interactivity": {
-			"clientNavigation": true
-		}
+		"color":   { "background": true, "text": true },
+		"spacing": { "padding": true, "margin": true },
+		"interactivity": { "clientNavigation": true }
 	},
 
-	"render": "file:./render.php",
-
-	"editorScript": "file:./src/index.js",
-	"style": "file:./src/style.css"
+	"render":       "file:./render.php",
+	"editorScript": "file:./build/index.js",
+	"editorStyle":  "file:./build/index.css",
+	"style":        "file:./build/style-index.css"
 }

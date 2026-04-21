@@ -9,19 +9,17 @@
 		"npm": ">=10.0.0"
 	},
 	"scripts": {
-		"build": "wp-scripts build --webpack-config webpack.config.js",
-		"start": "wp-scripts start --webpack-config webpack.config.js",
+		"build": "wp-scripts build --webpack-config=webpack.config.js",
+		"start": "wp-scripts start --webpack-config=webpack.config.js",
 		"lint:js": "wp-scripts lint-js",
 		"lint:css": "wp-scripts lint-style",
-		"lint:php": "composer run-script lint",
 		"packages-update": "wp-scripts packages-update",
 		"check-engines": "wp-scripts check-engines",
 		"check-licenses": "wp-scripts check-licenses"
 	},
-	"dependencies": {
-		"@wordpress/interactivity": "*"
-	},
+	"dependencies": {},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.0.0"
+		"@wordpress/scripts": "^30.0.0",
+		"@wordpress/interactivity": "*"
 	}
 }

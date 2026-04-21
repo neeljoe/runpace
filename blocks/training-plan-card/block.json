@@ -8,17 +8,22 @@
 	"description": "Displays a training plan with level badge, stats grid, and download CTA.",
 	"keywords": [ "training", "plan", "card", "running" ],
 	"textdomain": "runpace",
+
 	"attributes": {
-		"colorScheme": { "type": "string", "default": "default", "enum": ["default","dark","green","orange"] },
+		"colorScheme":  { "type": "string",  "default": "default", "enum": [ "default", "dark", "green", "orange" ] },
 		"showDownload": { "type": "boolean", "default": true },
-		"showStats": { "type": "boolean", "default": true }
+		"showStats":    { "type": "boolean", "default": true }
 	},
+
 	"usesContext": [ "postId", "postType" ],
+
 	"supports": {
 		"html": false,
 		"interactivity": { "clientNavigation": true }
 	},
-	"render": "file:./render.php",
-	"editorScript": "file:./src/index.js",
-	"style": "file:./src/style.css"
+
+	"render":       "file:./render.php",
+	"editorScript": "file:./build/index.js",
+	"editorStyle":  "file:./build/index.css",
+	"style":        "file:./build/style-index.css"
 }

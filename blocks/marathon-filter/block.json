@@ -10,51 +10,24 @@
 	"textdomain": "runpace",
 
 	"attributes": {
-		"postsPerPage": {
-			"type": "integer",
-			"default": 9
-		},
-		"showDistanceFilter": {
-			"type": "boolean",
-			"default": true
-		},
-		"showLocationFilter": {
-			"type": "boolean",
-			"default": true
-		},
-		"showDateFilter": {
-			"type": "boolean",
-			"default": true
-		},
-		"showViewToggle": {
-			"type": "boolean",
-			"default": true
-		},
-		"defaultView": {
-			"type": "string",
-			"default": "grid",
-			"enum": [ "grid", "list" ]
-		}
+		"postsPerPage":        { "type": "integer", "default": 9 },
+		"showDistanceFilter":  { "type": "boolean", "default": true },
+		"showLocationFilter":  { "type": "boolean", "default": true },
+		"showDateFilter":      { "type": "boolean", "default": true },
+		"showViewToggle":      { "type": "boolean", "default": true },
+		"defaultView":         { "type": "string",  "default": "grid", "enum": [ "grid", "list" ] }
 	},
 
 	"supports": {
 		"html": false,
-		"color": {
-			"background": true,
-			"text": false
-		},
-		"spacing": {
-			"padding": true,
-			"margin": true
-		},
+		"color":    { "background": true, "text": false },
+		"spacing":  { "padding": true, "margin": true },
 		"interactivity": true
 	},
 
-	"render": "file:./render.php",
-
-	"editorScript": "file:./build/index.js",
-
+	"render":           "file:./render.php",
+	"editorScript":     "file:./build/index.js",
+	"editorStyle":      "file:./build/index.css",
 	"viewScriptModule": "file:./build/view.js",
-
-	"style": "file:./build/style-index.css"
+	"style":            "file:./build/style-index.css"
 }
