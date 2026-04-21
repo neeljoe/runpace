@@ -9,6 +9,7 @@
 	"description": "Animated counter stats strip — e.g. '42KM · 10,000+ runners · 120 events'.",
 	"keywords": [ "stats", "counter", "numbers", "highlight", "running" ],
 	"textdomain": "runpace",
+
 	"attributes": {
 		"stats": {
 			"type": "array",
@@ -30,18 +31,6 @@
 			"type": "string",
 			"default": "wide"
 		},
-		"backgroundColor": {
-			"type": "string",
-			"default": "dark-surface"
-		},
-		"textColor": {
-			"type": "string",
-			"default": "white"
-		},
-		"accentColor": {
-			"type": "string",
-			"default": "primary"
-		},
 		"animationEnabled": {
 			"type": "boolean",
 			"default": true
@@ -53,6 +42,7 @@
 			"maximum": 6
 		}
 	},
+
 	"supports": {
 		"html": false,
 		"align": [ "wide", "full" ],
@@ -68,9 +58,14 @@
 		},
 		"interactivity": true
 	},
-	"viewScriptModule": "file:./build/view.js",
+
+	"render": "file:./render.php",
+
 	"editorScript": "file:./build/index.js",
+
+	"viewScriptModule": "file:./build/view.js",
+
 	"style": "file:./build/style-index.css",
-	"editorStyle": "file:./build/index.css",
-	"render": "file:./render.php"
+
+	"editorStyle": "file:./build/index.css"
 }

@@ -106,7 +106,9 @@ function runpace_register_marathon_meta(): void {
 		]
 	);
 
-	// Entry price (numeric, in USD — display formatting happens in block render).
+	// Entry price (numeric float, in USD — display formatting happens in block render).
+	// FIX: was absint() which silently truncates decimals (e.g. 99.99 → 99).
+	// Now uses a float lambda consistent with _runpace_peak_weekly_km.
 	register_post_meta(
 		$post_type,
 		'_runpace_price',
@@ -115,7 +117,9 @@ function runpace_register_marathon_meta(): void {
 			'description'       => __( 'Entry fee in USD.', 'runpace' ),
 			'single'            => true,
 			'default'           => 0,
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => static function ( mixed $value ): float {
+				return (float) max( 0, (float) $value );
+			},
 			'auth_callback'     => 'runpace_meta_auth_callback',
 			'show_in_rest'      => true,
 		]

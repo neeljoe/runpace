@@ -75,7 +75,6 @@ function runpace_setup(): void {
 	add_image_size( 'runpace-card',      600, 400, true );
 	add_image_size( 'runpace-card-wide', 900, 500, true );
 	add_image_size( 'runpace-hero',     1600, 800, true );
-
 }
 add_action( 'after_setup_theme', 'runpace_setup' );
 
@@ -96,7 +95,6 @@ function runpace_enqueue_assets(): void {
 		[],
 		RUNPACE_VERSION
 	);
-
 }
 add_action( 'wp_enqueue_scripts', 'runpace_enqueue_assets' );
 
@@ -107,6 +105,10 @@ add_action( 'wp_enqueue_scripts', 'runpace_enqueue_assets' );
  *
  * - block-variations.js: registers custom Query Loop variations
  *   (Upcoming Marathons, Featured Races, Related Races).
+ *
+ * NOTE: This is the single authoritative registration of runpace-block-variations.
+ * inc/05-blocks.php must NOT register this handle — doing so causes a duplicate
+ * registration that silently drops one copy and may enqueue a missing file.
  */
 function runpace_enqueue_editor_scripts(): void {
 
@@ -152,12 +154,11 @@ function runpace_block_categories( array $categories ): array {
 		],
 		$categories
 	);
-
 }
 add_filter( 'block_categories_all', 'runpace_block_categories' );
 
 /**
- * Register custom block patterns category.
+ * Register custom block patterns categories.
  */
 function runpace_register_pattern_categories(): void {
 
@@ -175,7 +176,6 @@ function runpace_register_pattern_categories(): void {
 		'runpace-hero',
 		[ 'label' => __( 'Heroes', 'runpace' ) ]
 	);
-
 }
 add_action( 'init', 'runpace_register_pattern_categories' );
 
@@ -198,5 +198,4 @@ add_action( 'init', 'runpace_register_pattern_categories' );
 	foreach ( $modules as $module ) {
 		require_once $module;
 	}
-
 } )();

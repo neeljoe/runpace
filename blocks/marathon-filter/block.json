@@ -52,7 +52,9 @@
 
 	"render": "file:./render.php",
 
-	"editorScript": "file:./src/index.js",
-	"viewScriptModule": "file:./src/view.js",
-	"style": "file:./src/style.css"
+	"editorScript": "file:./build/index.js",
+
+	"viewScriptModule": "file:./build/view.js",
+
+	"style": "file:./build/style-index.css"
 }

@@ -5,8 +5,13 @@
  * Registers all custom blocks from the blocks/ directory.
  * Each block is discovered via its block.json file.
  *
- * Also registers Query Loop variations on the server so they
- * appear in the editor without a client-side build step.
+ * Also registers the Block Bindings source so core blocks (Paragraph,
+ * Heading, Image) can be bound directly to RunPace post meta.
+ *
+ * NOTE: The runpace-block-variations editor script is registered exclusively
+ * in functions.php → runpace_enqueue_editor_scripts(). It must NOT be
+ * re-registered here — duplicate handle registration causes one copy to be
+ * silently dropped and may enqueue a non-existent file pre-build.
  *
  * @package RunPace
  * @since   1.0.0
@@ -39,76 +44,6 @@ function runpace_register_blocks(): void {
 }
 add_action( 'init', 'runpace_register_blocks' );
 
-// ─── Query Loop Variations ────────────────────────────────────────────────────
-
-/**
- * Enqueue the block variations script in the block editor.
- * This registers client-side Query Loop variations for the inserter.
- */
-function runpace_enqueue_editor_assets(): void {
-
-	$asset_file = RUNPACE_DIR . '/assets/js/block-variations.asset.php';
-	$version    = file_exists( $asset_file )
-		? require $asset_file
-		: [ 'dependencies' => [ 'wp-blocks', 'wp-element', 'wp-i18n' ], 'version' => RUNPACE_VERSION ];
-
-	wp_enqueue_script(
-		'runpace-block-variations',
-		RUNPACE_ASSETS . '/js/block-variations.js',
-		$version['dependencies'] ?? [ 'wp-blocks', 'wp-element', 'wp-i18n' ],
-		$version['version'] ?? RUNPACE_VERSION,
-		true
-	);
-}
-add_action( 'enqueue_block_editor_assets', 'runpace_enqueue_editor_assets' );
-
-// ─── Interactivity API: Marathon Filter State ─────────────────────────────────
-
-/**
- * Prime the server-side state for the marathon filter block.
- * Called during the render phase so wp_interactivity_state() is available.
- */
-function runpace_prime_filter_state(): void {
-
-	// Fetch all published marathons with their key meta for the JS store.
-	$marathons = get_posts(
-		[
-			'post_type'      => 'marathon',
-			'post_status'    => 'publish',
-			'posts_per_page' => 100,
-			'orderby'        => 'meta_value',
-			'meta_key'       => '_runpace_race_date',
-			'order'          => 'ASC',
-			'fields'         => 'ids',
-		]
-	);
-
-	$items = [];
-	foreach ( $marathons as $id ) {
-		$items[] = [
-			'id'       => $id,
-			'date'     => get_post_meta( $id, '_runpace_race_date', true ),
-			'city'     => get_post_meta( $id, '_runpace_city', true ),
-			'country'  => get_post_meta( $id, '_runpace_country', true ),
-			'price'    => (float) get_post_meta( $id, '_runpace_price', true ),
-			'distance' => wp_get_post_terms( $id, 'runpace_distance', [ 'fields' => 'names' ] ),
-		];
-	}
-
-	wp_interactivity_state(
-		'runpace/marathon-filter',
-		[
-			'allMarathons'     => $items,
-			'activeDistance'   => '',
-			'activeLocation'   => '',
-			'activeDateFilter' => 'upcoming',
-			'viewMode'         => 'grid',
-			'visibleCount'     => 9,
-			'pageSize'         => 9,
-		]
-	);
-}
-
 // ─── Block Bindings Source Registration ───────────────────────────────────────
 
 /**
@@ -116,6 +51,8 @@ function runpace_prime_filter_state(): void {
  *
  * This allows editors to bind core blocks (Paragraph, Heading, Image)
  * directly to post meta via the Block Bindings API without custom render.php.
+ *
+ * Available keys match the meta fields registered in inc/03-meta-fields.php.
  */
 function runpace_register_bindings(): void {
 
