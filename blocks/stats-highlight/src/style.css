@@ -1,97 +1,144 @@
 /**
- * Stats Highlight Block – style.css
+ * RunPace – Stats Highlight block styles
+ *
+ * Design: dark-surface background strip, large display-font numbers,
+ * animated count-up reveal, responsive grid.
  */
 
+/* ── Block wrapper ────────────────────────────────────────────────────────── */
+
 .runpace-stats {
-	padding: var(--wp--preset--spacing--8) var(--wp--preset--spacing--6);
-	border-radius: var(--wp--custom--radius--xl);
+	padding-block: var(--wp--preset--spacing--9, 6rem);
+	padding-inline: var(--wp--preset--spacing--6, 2rem);
+	background-color: var(--wp--preset--color--dark-surface, #1a1d1b);
+	color: var(--wp--preset--color--white, #fff);
+	overflow: hidden;
 }
 
-/* Themes */
-.runpace-stats--dark {
-	background: var(--wp--preset--color--dark-base);
-}
-.runpace-stats--light {
-	background: var(--wp--preset--color--surface);
-	box-shadow: var(--wp--preset--shadow--md);
-}
-.runpace-stats--primary {
-	background: var(--wp--preset--color--primary);
-}
-.runpace-stats--split {
-	background: linear-gradient(135deg, var(--wp--preset--color--dark-base) 50%, var(--wp--preset--color--dark-surface) 50%);
-}
+/* ── Grid ─────────────────────────────────────────────────────────────────── */
 
-/* List */
-.runpace-stats__list {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-	gap: var(--wp--preset--spacing--6);
+.runpace-stats__grid {
 	list-style: none;
 	margin: 0;
 	padding: 0;
+	display: grid;
+	grid-template-columns: repeat( var(--stats-columns, 3), 1fr );
+	gap: var(--wp--preset--spacing--7, 3rem) var(--wp--preset--spacing--6, 2rem);
+	max-width: var(--wp--style--global--wide-size, 1200px);
+	margin-inline: auto;
 }
 
-/* Each stat */
+@media (max-width: 768px) {
+	.runpace-stats__grid {
+		grid-template-columns: repeat(
+			min( var(--stats-columns, 3), 2 ),
+			1fr
+		);
+	}
+}
+
+@media (max-width: 480px) {
+	.runpace-stats__grid {
+		grid-template-columns: 1fr;
+		gap: var(--wp--preset--spacing--6, 2rem);
+	}
+}
+
+/* ── Item ─────────────────────────────────────────────────────────────────── */
+
 .runpace-stats__item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
-	gap: var(--wp--preset--spacing--2);
+	gap: var(--wp--preset--spacing--3, 0.75rem);
 
-	/* Scroll-reveal: start hidden/shifted, animate in when .is-revealed is added */
+	/* Entrance animation — CSS handles the visual; JS triggers the class */
 	opacity: 0;
-	transform: translateY(20px);
+	transform: translateY( 20px );
 	transition:
-		opacity 0.5s ease calc( var(--item-index, 0) * 0.1s ),
-		transform 0.5s ease calc( var(--item-index, 0) * 0.1s );
+		opacity 0.5s ease,
+		transform 0.5s ease;
 }
 
-.runpace-stats.is-revealed .runpace-stats__item {
+.runpace-stats__item.is-animated,
+.runpace-stats--editor .runpace-stats__item {
 	opacity: 1;
-	transform: translateY(0);
+	transform: translateY( 0 );
 }
 
-/* Editor: always show */
-.wp-block-runpace-stats-highlight .runpace-stats__item {
-	opacity: 1;
-	transform: none;
-}
+/* Stagger entrance via nth-child */
+.runpace-stats__item:nth-child(1) { transition-delay: 0ms;   }
+.runpace-stats__item:nth-child(2) { transition-delay: 100ms; }
+.runpace-stats__item:nth-child(3) { transition-delay: 200ms; }
+.runpace-stats__item:nth-child(4) { transition-delay: 300ms; }
+.runpace-stats__item:nth-child(5) { transition-delay: 400ms; }
+.runpace-stats__item:nth-child(6) { transition-delay: 500ms; }
 
-.runpace-stats__icon {
-	font-size: 2rem;
+/* ── Number display ───────────────────────────────────────────────────────── */
+
+.runpace-stats__number {
+	display: flex;
+	align-items: baseline;
+	gap: 0.1em;
 	line-height: 1;
 }
 
 .runpace-stats__value {
-	font-family: var(--wp--preset--font-family--display);
-	font-size: var(--wp--preset--font-size--5xl);
-	line-height: 1;
+	font-family: var(--wp--preset--font-family--display, 'Bebas Neue', Impact, sans-serif);
+	font-size: clamp( 3rem, 8vw, 5.5rem );
+	font-weight: 400;
 	letter-spacing: -0.02em;
+	color: var(--wp--preset--color--primary, #0bda7a);
+	line-height: 1;
+
+	/* Prevent layout shift during count-up */
+	font-variant-numeric: tabular-nums;
 }
 
-.runpace-stats--dark    .runpace-stats__value,
-.runpace-stats--split   .runpace-stats__value { color: var(--wp--preset--color--primary); }
-.runpace-stats--light   .runpace-stats__value { color: var(--wp--preset--color--ink); }
-.runpace-stats--primary .runpace-stats__value { color: var(--wp--preset--color--ink); }
+.runpace-stats__suffix {
+	font-family: var(--wp--preset--font-family--display, 'Bebas Neue', Impact, sans-serif);
+	font-size: clamp( 1.5rem, 4vw, 2.5rem );
+	font-weight: 400;
+	color: var(--wp--preset--color--primary-light, #d4f7e7);
+	line-height: 1;
+}
+
+/* ── Label ────────────────────────────────────────────────────────────────── */
 
 .runpace-stats__label {
-	font-size: var(--wp--preset--font-size--sm);
-	font-weight: 600;
-	letter-spacing: 0.05em;
+	font-family: var(--wp--preset--font-family--sans, 'DM Sans', Arial, sans-serif);
+	font-size: var(--wp--preset--font-size--sm, 0.875rem);
+	font-weight: 500;
+	letter-spacing: 0.06em;
 	text-transform: uppercase;
+	color: var(--wp--preset--color--ink-muted, #7a7973);
+	max-width: 16ch;
 }
 
-.runpace-stats--dark    .runpace-stats__label,
-.runpace-stats--split   .runpace-stats__label { color: var(--wp--preset--color--ink-muted); }
-.runpace-stats--light   .runpace-stats__label { color: var(--wp--preset--color--ink-secondary); }
-.runpace-stats--primary .runpace-stats__label { color: var(--wp--preset--color--ink); opacity: 0.75; }
+/* ── Dividers between items (large screens only) ──────────────────────────── */
 
-/* Observer target – zero-size anchor element */
-.runpace-stats__observer-target {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	pointer-events: none;
+@media (min-width: 769px) {
+	.runpace-stats__item + .runpace-stats__item {
+		border-left: 1px solid var(--wp--preset--color--dark-border, #2c302d);
+		padding-left: var(--wp--preset--spacing--6, 2rem);
+	}
+}
+
+/* ── Alignment variants ───────────────────────────────────────────────────── */
+
+.wp-block-runpace-stats-highlight.alignfull {
+	padding-inline: var(--wp--preset--spacing--6, 2rem);
+}
+
+/* ── Editor preview ───────────────────────────────────────────────────────── */
+
+.runpace-stats--editor .runpace-stats__item {
+	opacity: 1;
+	transform: none;
+}
+
+.runpace-stats--editor .runpace-stats__value {
+	/* Tabular numbers ensure stable layout while editing */
+	font-variant-numeric: tabular-nums;
 }

@@ -1,77 +1,147 @@
 /**
- * Stats Highlight Block – Editor
+ * RunPace – Stats Highlight block editor script.
+ *
+ * Provides the block edit UI with live-editable stat items.
  */
 
 import { registerBlockType } from '@wordpress/blocks';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, SelectControl, ToggleControl, Button, TextControl } from '@wordpress/components';
+import {
+	useBlockProps,
+	InspectorControls,
+	PanelColorSettings,
+} from '@wordpress/block-editor';
+import {
+	PanelBody,
+	TextControl,
+	Button,
+	RangeControl,
+	ToggleControl,
+	__experimentalItemGroup as ItemGroup,
+	__experimentalItem as Item,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import metadata from '../block.json';
+import { plus, trash } from '@wordpress/icons';
+import metadata from './block.json';
 
-const THEMES = [
-	{ label: __( 'Dark', 'runpace' ),    value: 'dark' },
-	{ label: __( 'Light', 'runpace' ),   value: 'light' },
-	{ label: __( 'Primary', 'runpace' ), value: 'primary' },
-	{ label: __( 'Split', 'runpace' ),   value: 'split' },
-];
+function Edit( { attributes, setAttributes } ) {
+	const { stats, animationEnabled, columns } = attributes;
 
-registerBlockType( metadata.name, {
-	edit( { attributes, setAttributes } ) {
-		const { stats, theme, animateOnScroll } = attributes;
-		const blockProps = useBlockProps( { className: `runpace-stats runpace-stats--${ theme } is-revealed` } );
+	const blockProps = useBlockProps( {
+		className: 'runpace-stats runpace-stats--editor',
+		'data-columns': String( columns ),
+	} );
 
-		const updateStat = ( index, key, value ) => {
-			const next = stats.map( ( s, i ) => i === index ? { ...s, [ key ]: value } : s );
-			setAttributes( { stats: next } );
-		};
+	function updateStat( index, key, value ) {
+		const updated = stats.map( ( s, i ) =>
+			i === index ? { ...s, [ key ]: value } : s
+		);
+		setAttributes( { stats: updated } );
+	}
 
-		const addStat = () => setAttributes( { stats: [ ...stats, { value: '', label: '', icon: '' } ] } );
-		const removeStat = ( index ) => setAttributes( { stats: stats.filter( ( _, i ) => i !== index ) } );
+	function addStat() {
+		setAttributes( {
+			stats: [ ...stats, { value: '0', suffix: '', label: 'New stat' } ],
+		} );
+	}
 
-		return (
-			<>
-				<InspectorControls>
-					<PanelBody title={ __( 'Appearance', 'runpace' ) }>
-						<SelectControl
-							label={ __( 'Theme', 'runpace' ) }
-							value={ theme }
-							options={ THEMES }
-							onChange={ ( val ) => setAttributes( { theme: val } ) }
-						/>
-						<ToggleControl
-							label={ __( 'Animate on scroll', 'runpace' ) }
-							checked={ animateOnScroll }
-							onChange={ ( val ) => setAttributes( { animateOnScroll: val } ) }
-						/>
-					</PanelBody>
-					<PanelBody title={ __( 'Stats', 'runpace' ) }>
+	function removeStat( index ) {
+		setAttributes( { stats: stats.filter( ( _, i ) => i !== index ) } );
+	}
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'runpace' ) } initialOpen>
+					<RangeControl
+						label={ __( 'Columns', 'runpace' ) }
+						value={ columns }
+						onChange={ ( v ) => setAttributes( { columns: v } ) }
+						min={ 1 }
+						max={ 6 }
+					/>
+					<ToggleControl
+						label={ __( 'Scroll-reveal animation', 'runpace' ) }
+						help={ animationEnabled
+							? __( 'Stats count up when scrolled into view.', 'runpace' )
+							: __( 'Stats display immediately.', 'runpace' ) }
+						checked={ animationEnabled }
+						onChange={ ( v ) => setAttributes( { animationEnabled: v } ) }
+					/>
+				</PanelBody>
+
+				<PanelBody title={ __( 'Stats', 'runpace' ) } initialOpen>
+					<ItemGroup>
 						{ stats.map( ( stat, i ) => (
-							<div key={ i } style={ { marginBottom: 16, padding: '12px', background: '#f0f0f0', borderRadius: 4 } }>
-								<TextControl label={ __( 'Value', 'runpace' ) } value={ stat.value } onChange={ ( v ) => updateStat( i, 'value', v ) } />
-								<TextControl label={ __( 'Label', 'runpace' ) } value={ stat.label } onChange={ ( v ) => updateStat( i, 'label', v ) } />
-								<TextControl label={ __( 'Icon (emoji)', 'runpace' ) } value={ stat.icon }  onChange={ ( v ) => updateStat( i, 'icon',  v ) } />
-								<Button isDestructive isSmall onClick={ () => removeStat( i ) }>
+							<Item key={ i }>
+								<TextControl
+									label={ __( 'Value', 'runpace' ) }
+									value={ stat.value }
+									onChange={ ( v ) => updateStat( i, 'value', v ) }
+								/>
+								<TextControl
+									label={ __( 'Suffix', 'runpace' ) }
+									value={ stat.suffix }
+									placeholder="+  KM  %"
+									onChange={ ( v ) => updateStat( i, 'suffix', v ) }
+								/>
+								<TextControl
+									label={ __( 'Label', 'runpace' ) }
+									value={ stat.label }
+									onChange={ ( v ) => updateStat( i, 'label', v ) }
+								/>
+								<Button
+									isDestructive
+									variant="tertiary"
+									icon={ trash }
+									onClick={ () => removeStat( i ) }
+									disabled={ stats.length <= 1 }
+								>
 									{ __( 'Remove', 'runpace' ) }
 								</Button>
-							</div>
+							</Item>
 						) ) }
-						<Button isPrimary onClick={ addStat }>{ __( '+ Add stat', 'runpace' ) }</Button>
-					</PanelBody>
-				</InspectorControls>
+					</ItemGroup>
 
-				<div { ...blockProps }>
-					<ul className="runpace-stats__list" role="list">
-						{ stats.map( ( stat, i ) => (
-							<li key={ i } className="runpace-stats__item" style={ { '--item-index': i } }>
-								{ stat.icon && <span className="runpace-stats__icon" aria-hidden="true">{ stat.icon }</span> }
-								<span className="runpace-stats__value">{ stat.value || '—' }</span>
-								<span className="runpace-stats__label">{ stat.label || __( 'Label', 'runpace' ) }</span>
-							</li>
-						) ) }
-					</ul>
-				</div>
-			</>
-		);
-	},
-	save() { return null; },
+					<Button
+						variant="secondary"
+						icon={ plus }
+						onClick={ addStat }
+						disabled={ stats.length >= 6 }
+					>
+						{ __( 'Add stat', 'runpace' ) }
+					</Button>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<ul
+					className="runpace-stats__grid"
+					style={ { '--stats-columns': columns } }
+				>
+					{ stats.map( ( stat, i ) => (
+						<li key={ i } className="runpace-stats__item">
+							<span className="runpace-stats__number">
+								<span className="runpace-stats__value">{ stat.value }</span>
+								{ stat.suffix && (
+									<span className="runpace-stats__suffix">
+										{ stat.suffix }
+									</span>
+								) }
+							</span>
+							{ stat.label && (
+								<span className="runpace-stats__label">
+									{ stat.label }
+								</span>
+							) }
+						</li>
+					) ) }
+				</ul>
+			</div>
+		</>
+	);
+}
+
+registerBlockType( metadata.name, {
+	edit: Edit,
+	save: () => null, // Dynamic block — server rendered.
 } );

@@ -100,6 +100,38 @@ function runpace_enqueue_assets(): void {
 }
 add_action( 'wp_enqueue_scripts', 'runpace_enqueue_assets' );
 
+// ─── Block Editor Assets ───────────────────────────────────────────────────────
+
+/**
+ * Enqueue assets that load only in the block editor.
+ *
+ * - block-variations.js: registers custom Query Loop variations
+ *   (Upcoming Marathons, Featured Races, Related Races).
+ */
+function runpace_enqueue_editor_scripts(): void {
+
+	$variations_asset = RUNPACE_DIR . '/assets/js/build/block-variations.asset.php';
+
+	if ( file_exists( $variations_asset ) ) {
+		$asset = require $variations_asset;
+	} else {
+		// Fallback during development before first build.
+		$asset = [
+			'dependencies' => [ 'wp-blocks', 'wp-i18n', 'wp-block-editor' ],
+			'version'      => RUNPACE_VERSION,
+		];
+	}
+
+	wp_enqueue_script(
+		'runpace-block-variations',
+		RUNPACE_ASSETS . '/js/build/block-variations.js',
+		$asset['dependencies'],
+		$asset['version'],
+		true
+	);
+}
+add_action( 'enqueue_block_editor_assets', 'runpace_enqueue_editor_scripts' );
+
 // ─── Block Editor ─────────────────────────────────────────────────────────────
 
 /**

@@ -1,23 +1,27 @@
 {
 	"name": "runpace",
 	"version": "1.0.0",
-	"description": "RunPace WordPress Block Theme",
+	"description": "RunPace WordPress block theme build tooling",
 	"private": true,
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": ">=20.0.0",
+		"npm": ">=10.0.0"
+	},
 	"scripts": {
-		"build": "wp-scripts build",
-		"start": "wp-scripts start",
+		"build": "wp-scripts build --webpack-config webpack.config.js",
+		"start": "wp-scripts start --webpack-config webpack.config.js",
 		"lint:js": "wp-scripts lint-js",
 		"lint:css": "wp-scripts lint-style",
-		"format": "wp-scripts format",
-		"packages-update": "wp-scripts packages-update"
+		"lint:php": "composer run-script lint",
+		"packages-update": "wp-scripts packages-update",
+		"check-engines": "wp-scripts check-engines",
+		"check-licenses": "wp-scripts check-licenses"
+	},
+	"dependencies": {
+		"@wordpress/interactivity": "*"
 	},
 	"devDependencies": {
 		"@wordpress/scripts": "^30.0.0"
-	},
-	"dependencies": {
-		"@wordpress/interactivity": "^6.0.0"
-	},
-	"wp-scripts": {
-		"webpack-config": "node_modules/@wordpress/scripts/config/webpack.config.js"
 	}
 }

@@ -2,13 +2,14 @@
 /**
  * RunPace – Sample Content Seeder
  *
- * Creates sample Marathons and Training Plans on theme activation
- * so the site has something to show immediately after install.
+ * Creates sample marathons, training plans, and default taxonomy terms
+ * on theme activation (idempotent — runs only once per install).
  *
- * Only runs when WP_DEBUG is true OR when explicitly triggered via
- * the admin action ?runpace_seed=1 (admin-only, nonce-protected).
+ * Triggered by: WP-CLI  →  wp eval 'runpace_seed_sample_content();'
+ *               Or automatically via the after_switch_theme hook
+ *               (gated by a transient so it runs only once).
  *
- * Safe to run multiple times — checks post existence before inserting.
+ * To re-seed (dev only): delete the 'runpace_seeded' option then reactivate.
  *
  * @package RunPace
  * @since   1.0.0
@@ -20,165 +21,173 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// ─── Admin trigger ────────────────────────────────────────────────────────────
+// ─── Gate: only run once ───────────────────────────────────────────────────────
+
+add_action(
+	'after_switch_theme',
+	static function (): void {
+		if ( get_option( 'runpace_content_seeded' ) ) {
+			return;
+		}
+		runpace_seed_sample_content();
+		update_option( 'runpace_content_seeded', '1' );
+	}
+);
+
+// ─── Main seeder ──────────────────────────────────────────────────────────────
 
 /**
- * Allow manual seeding from wp-admin via ?runpace_seed=1.
+ * Entry point — seeds marathons, training plans, and a blog post.
+ * Safe to call from WP-CLI; each inner function checks for duplicates.
  */
-function runpace_seed_admin_trigger(): void {
+function runpace_seed_sample_content(): void {
 
-	if ( ! isset( $_GET['runpace_seed'] ) ) {
-		return;
-	}
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
-	}
-
-	check_admin_referer( 'runpace_seed' );
-
-	runpace_create_sample_content();
-
-	wp_safe_redirect( admin_url( 'edit.php?post_type=marathon&seeded=1' ) );
-	exit;
-}
-add_action( 'admin_init', 'runpace_seed_admin_trigger' );
-
-/**
- * Show a seed notice + button in the admin.
- */
-function runpace_seed_notice(): void {
-
-	$screen = get_current_screen();
-	if ( ! $screen || ! in_array( $screen->post_type, [ 'marathon', 'training-plan' ], true ) ) {
-		return;
-	}
-
-	if ( isset( $_GET['seeded'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>✅ RunPace sample content created!</p></div>';
-		return;
-	}
-
-	$seed_url = wp_nonce_url(
-		add_query_arg( 'runpace_seed', '1', admin_url( 'admin.php' ) ),
-		'runpace_seed'
-	);
-
-	echo '<div class="notice notice-info"><p>';
-	printf(
-		/* translators: %s = seed link */
-		esc_html__( 'RunPace: No content yet? %s', 'runpace' ),
-		'<a href="' . esc_url( $seed_url ) . '">' . esc_html__( 'Create sample content →', 'runpace' ) . '</a>'
-	);
-	echo '</p></div>';
-}
-add_action( 'admin_notices', 'runpace_seed_notice' );
-
-// ─── Seeder ───────────────────────────────────────────────────────────────────
-
-/**
- * Create all sample posts.
- */
-function runpace_create_sample_content(): void {
 	runpace_seed_marathons();
 	runpace_seed_training_plans();
+	runpace_seed_blog_post();
+}
+
+// ─── Marathons ─────────────────────────────────────────────────────────────────
+
+/**
+ * Sample marathon data.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function runpace_sample_marathons(): array {
+	return [
+		[
+			'title'       => 'Berlin Marathon 2026',
+			'content'     => '<p>One of the six World Marathon Majors, the Berlin Marathon is renowned for its flat course through the heart of Germany\'s capital. Fast times, incredible atmosphere, and an iconic finish at the Brandenburg Gate make this a bucket-list race for runners worldwide.</p>',
+			'excerpt'     => 'Flat, fast, and iconic. One of the World Marathon Majors through the heart of Berlin.',
+			'meta'        => [
+				'_runpace_race_date'         => '2026-09-27',
+				'_runpace_city'              => 'Berlin',
+				'_runpace_country'           => 'Germany',
+				'_runpace_distance_label'    => '42.195 km',
+				'_runpace_registration_url'  => 'https://www.bmw-berlin-marathon.com/',
+				'_runpace_website_url'       => 'https://www.bmw-berlin-marathon.com/',
+				'_runpace_price'             => 135,
+				'_runpace_elevation_gain'    => 88,
+				'_runpace_difficulty_rating' => 1,
+				'_runpace_is_featured'       => true,
+				'_runpace_participant_limit' => 60000,
+			],
+			'distance'    => 'Marathon',
+			'event_type'  => 'Road',
+		],
+		[
+			'title'       => 'Tokyo Marathon 2026',
+			'content'     => '<p>Running through the heart of one of the world\'s greatest cities, the Tokyo Marathon offers an unforgettable experience past temples, skyscrapers, and cherry blossom parks. A World Marathon Major with world-class organisation and enthusiastic local support.</p>',
+			'excerpt'     => 'World Marathon Major through the heart of Tokyo. Cherry blossoms optional.',
+			'meta'        => [
+				'_runpace_race_date'         => '2026-03-01',
+				'_runpace_city'              => 'Tokyo',
+				'_runpace_country'           => 'Japan',
+				'_runpace_distance_label'    => '42.195 km',
+				'_runpace_registration_url'  => 'https://www.marathon.tokyo/',
+				'_runpace_website_url'       => 'https://www.marathon.tokyo/',
+				'_runpace_price'             => 120,
+				'_runpace_elevation_gain'    => 102,
+				'_runpace_difficulty_rating' => 2,
+				'_runpace_is_featured'       => true,
+				'_runpace_participant_limit' => 38000,
+			],
+			'distance'    => 'Marathon',
+			'event_type'  => 'Road',
+		],
+		[
+			'title'       => 'Cape Town Marathon 2026',
+			'content'     => '<p>Set against the backdrop of Table Mountain, the Cape Town Marathon is Africa\'s only World Athletics Platinum Label road race. The scenic out-and-back course hugs the Atlantic seaboard for unforgettable views on every kilometre.</p>',
+			'excerpt'     => 'Africa\'s only Platinum Label road race with Table Mountain as your backdrop.',
+			'meta'        => [
+				'_runpace_race_date'         => '2026-10-18',
+				'_runpace_city'              => 'Cape Town',
+				'_runpace_country'           => 'South Africa',
+				'_runpace_distance_label'    => '42.195 km',
+				'_runpace_registration_url'  => 'https://www.capetownmarathon.com/',
+				'_runpace_website_url'       => 'https://www.capetownmarathon.com/',
+				'_runpace_price'             => 75,
+				'_runpace_elevation_gain'    => 185,
+				'_runpace_difficulty_rating' => 2,
+				'_runpace_is_featured'       => false,
+				'_runpace_participant_limit' => 25000,
+			],
+			'distance'    => 'Marathon',
+			'event_type'  => 'Road',
+		],
+		[
+			'title'       => 'UTMB Mont-Blanc 2026',
+			'content'     => '<p>The Ultra-Trail du Mont-Blanc is the pinnacle of trail running. This 171 km loop around the Mont-Blanc massif passes through France, Italy, and Switzerland with over 10,000 m of positive elevation. Only the most prepared runners attempt this iconic challenge.</p>',
+			'excerpt'     => '171 km around Mont-Blanc through three countries. The ultimate trail challenge.',
+			'meta'        => [
+				'_runpace_race_date'         => '2026-08-28',
+				'_runpace_city'              => 'Chamonix',
+				'_runpace_country'           => 'France',
+				'_runpace_distance_label'    => '171 km',
+				'_runpace_registration_url'  => 'https://utmb.world/',
+				'_runpace_website_url'       => 'https://utmb.world/',
+				'_runpace_price'             => 690,
+				'_runpace_elevation_gain'    => 10000,
+				'_runpace_difficulty_rating' => 5,
+				'_runpace_is_featured'       => true,
+				'_runpace_participant_limit' => 2300,
+			],
+			'distance'    => 'Ultra',
+			'event_type'  => 'Trail',
+		],
+		[
+			'title'       => 'Valencia Half Marathon 2026',
+			'content'     => '<p>Valencia is one of the fastest half marathon courses in the world — a flat, point-to-point route finishing in the city centre. Perfect for a personal best attempt on a course that regularly produces world-class times.</p>',
+			'excerpt'     => 'One of the world\'s fastest half marathon courses — ideal for a PB attempt.',
+			'meta'        => [
+				'_runpace_race_date'         => '2026-10-25',
+				'_runpace_city'              => 'Valencia',
+				'_runpace_country'           => 'Spain',
+				'_runpace_distance_label'    => '21.097 km',
+				'_runpace_registration_url'  => 'https://valenciamarathon.es/',
+				'_runpace_website_url'       => 'https://valenciamarathon.es/',
+				'_runpace_price'             => 45,
+				'_runpace_elevation_gain'    => 42,
+				'_runpace_difficulty_rating' => 1,
+				'_runpace_is_featured'       => false,
+				'_runpace_participant_limit' => 18000,
+			],
+			'distance'    => 'Half marathon',
+			'event_type'  => 'Road',
+		],
+		[
+			'title'       => 'Comrades Marathon 2026',
+			'content'     => '<p>The world\'s largest and oldest ultra marathon — 89 km between Pietermaritzburg and Durban in South Africa. The Comrades is as much a cultural institution as it is a race, drawing over 25,000 runners each year.',
+			'excerpt'     => 'The world\'s largest ultra: 89 km through the KwaZulu-Natal Midlands.',
+			'meta'        => [
+				'_runpace_race_date'         => '2026-06-14',
+				'_runpace_city'              => 'Durban',
+				'_runpace_country'           => 'South Africa',
+				'_runpace_distance_label'    => '89 km',
+				'_runpace_registration_url'  => 'https://www.comrades.com/',
+				'_runpace_website_url'       => 'https://www.comrades.com/',
+				'_runpace_price'             => 95,
+				'_runpace_elevation_gain'    => 1850,
+				'_runpace_difficulty_rating' => 4,
+				'_runpace_is_featured'       => false,
+				'_runpace_participant_limit' => 25000,
+			],
+			'distance'    => 'Ultra',
+			'event_type'  => 'Road',
+		],
+	];
 }
 
 /**
- * Insert sample marathons.
+ * Insert sample marathons (skips any with matching title).
  */
 function runpace_seed_marathons(): void {
 
-	$marathons = [
-		[
-			'title'        => 'Berlin Marathon',
-			'city'         => 'Berlin',
-			'country'      => 'Germany',
-			'race_date'    => date( 'Y-m-d', strtotime( '+120 days' ) ),
-			'price'        => 120,
-			'elevation'    => 80,
-			'difficulty'   => 2,
-			'distance'     => 'Marathon',
-			'event_type'   => 'Road',
-			'reg_url'      => 'https://www.bmw-berlin-marathon.com',
-			'featured'     => true,
-			'excerpt'      => 'One of the world\'s fastest and most iconic city marathons. The flat course through Berlin\'s historic streets makes it a favourite for PBs.',
-		],
-		[
-			'title'        => 'Boston Marathon',
-			'city'         => 'Boston',
-			'country'      => 'United States',
-			'race_date'    => date( 'Y-m-d', strtotime( '+200 days' ) ),
-			'price'        => 215,
-			'elevation'    => 450,
-			'difficulty'   => 4,
-			'distance'     => 'Marathon',
-			'event_type'   => 'Road',
-			'reg_url'      => 'https://www.baa.org',
-			'featured'     => true,
-			'excerpt'      => 'The world\'s oldest annual marathon and one of the six World Marathon Majors. Qualification required.',
-		],
-		[
-			'title'        => 'Tokyo Marathon',
-			'city'         => 'Tokyo',
-			'country'      => 'Japan',
-			'race_date'    => date( 'Y-m-d', strtotime( '+90 days' ) ),
-			'price'        => 180,
-			'elevation'    => 100,
-			'difficulty'   => 2,
-			'distance'     => 'Marathon',
-			'event_type'   => 'Road',
-			'reg_url'      => 'https://www.tokyomarathon.jp',
-			'featured'     => true,
-			'excerpt'      => 'Run through the heart of Tokyo past landmarks like Sensō-ji Temple and Tokyo Tower.',
-		],
-		[
-			'title'        => 'Ultra Trail du Mont-Blanc',
-			'city'         => 'Chamonix',
-			'country'      => 'France',
-			'race_date'    => date( 'Y-m-d', strtotime( '+300 days' ) ),
-			'price'        => 350,
-			'elevation'    => 10000,
-			'difficulty'   => 5,
-			'distance'     => 'Ultra',
-			'event_type'   => 'Trail',
-			'reg_url'      => 'https://utmbmontblanc.com',
-			'featured'     => false,
-			'excerpt'      => '170km around the Mont Blanc massif through France, Italy, and Switzerland. The ultimate mountain ultra.',
-		],
-		[
-			'title'        => 'London Half Marathon',
-			'city'         => 'London',
-			'country'      => 'United Kingdom',
-			'race_date'    => date( 'Y-m-d', strtotime( '+60 days' ) ),
-			'price'        => 65,
-			'elevation'    => 120,
-			'difficulty'   => 2,
-			'distance'     => 'Half marathon',
-			'event_type'   => 'Road',
-			'reg_url'      => 'https://www.londonmarathon.co.uk',
-			'featured'     => false,
-			'excerpt'      => 'A scenic half marathon through London\'s iconic streets and parklands. Perfect for those stepping up from 10K.',
-		],
-		[
-			'title'        => 'Sydney 10K',
-			'city'         => 'Sydney',
-			'country'      => 'Australia',
-			'race_date'    => date( 'Y-m-d', strtotime( '+45 days' ) ),
-			'price'        => 55,
-			'elevation'    => 60,
-			'difficulty'   => 1,
-			'distance'     => '10K',
-			'event_type'   => 'Road',
-			'reg_url'      => 'https://www.sydneyrunningfestival.com.au',
-			'featured'     => false,
-			'excerpt'      => 'Run past the Opera House and Harbour Bridge on one of the world\'s most beautiful running routes.',
-		],
-	];
+	foreach ( runpace_sample_marathons() as $data ) {
 
-	foreach ( $marathons as $data ) {
 		// Skip if already exists.
-		$existing = get_page_by_title( $data['title'], OBJECT, 'marathon' ); // phpcs:ignore WordPress.WP.DeprecatedFunctions
+		$existing = get_page_by_title( $data['title'], OBJECT, 'marathon' );
 		if ( $existing ) {
 			continue;
 		}
@@ -188,92 +197,117 @@ function runpace_seed_marathons(): void {
 				'post_type'    => 'marathon',
 				'post_status'  => 'publish',
 				'post_title'   => $data['title'],
+				'post_content' => $data['content'],
 				'post_excerpt' => $data['excerpt'],
-				'post_content' => sprintf(
-					'<!-- wp:paragraph --><p>%s is a world-class running event. Check the official website for full details and registration.</p><!-- /wp:paragraph -->',
-					esc_html( $data['title'] )
-				),
-			]
+			],
+			true
 		);
 
-		if ( is_wp_error( $post_id ) || ! $post_id ) {
+		if ( is_wp_error( $post_id ) ) {
 			continue;
 		}
 
 		// Meta.
-		update_post_meta( $post_id, '_runpace_race_date',       $data['race_date'] );
-		update_post_meta( $post_id, '_runpace_city',            $data['city'] );
-		update_post_meta( $post_id, '_runpace_country',         $data['country'] );
-		update_post_meta( $post_id, '_runpace_price',           $data['price'] );
-		update_post_meta( $post_id, '_runpace_elevation_gain',  $data['elevation'] );
-		update_post_meta( $post_id, '_runpace_difficulty_rating', $data['difficulty'] );
-		update_post_meta( $post_id, '_runpace_registration_url', $data['reg_url'] );
-		update_post_meta( $post_id, '_runpace_is_featured',     $data['featured'] );
-		update_post_meta( $post_id, '_runpace_distance_label',  $data['distance'] );
-
-		// Taxonomies.
-		$dist_term = get_term_by( 'name', $data['distance'], 'runpace_distance' );
-		if ( $dist_term ) {
-			wp_set_post_terms( $post_id, [ $dist_term->term_id ], 'runpace_distance' );
+		foreach ( $data['meta'] as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
 		}
 
-		$event_term = get_term_by( 'name', $data['event_type'], 'runpace_event_type' );
-		if ( $event_term ) {
-			wp_set_post_terms( $post_id, [ $event_term->term_id ], 'runpace_event_type' );
+		// Distance taxonomy.
+		if ( ! empty( $data['distance'] ) ) {
+			wp_set_object_terms( $post_id, $data['distance'], 'runpace_distance' );
+		}
+
+		// Event type taxonomy.
+		if ( ! empty( $data['event_type'] ) ) {
+			wp_set_object_terms( $post_id, $data['event_type'], 'runpace_event_type' );
 		}
 	}
 }
 
+// ─── Training Plans ────────────────────────────────────────────────────────────
+
 /**
- * Insert sample training plans.
+ * Sample training plan data.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function runpace_sample_training_plans(): array {
+	return [
+		[
+			'title'      => 'Couch to 5K – 8 Week Plan',
+			'content'    => '<p>This beginner-friendly plan takes you from no running background to finishing a 5K in just 8 weeks. Sessions alternate walking and running intervals, gradually building your aerobic base with just 3 sessions per week.</p><p>No equipment needed beyond a good pair of running shoes. Rest days are built in for recovery.</p>',
+			'excerpt'    => 'From zero to 5K in 8 weeks. Perfect for complete beginners with just 3 sessions per week.',
+			'meta'       => [
+				'_runpace_duration_weeks'    => 8,
+				'_runpace_peak_weekly_km'    => 20,
+				'_runpace_sessions_per_week' => 3,
+				'_runpace_level_label'       => 'Beginner',
+				'_runpace_goal_label'        => '5K',
+				'_runpace_is_free'           => true,
+				'_runpace_download_url'      => '',
+			],
+			'difficulty' => 'Beginner',
+			'goal'       => '5K',
+		],
+		[
+			'title'      => 'Sub-4 Hour Marathon – 16 Week Plan',
+			'content'    => '<p>A structured 16-week build targeting a sub-4 hour marathon finish. Combines easy runs, tempo intervals, long runs up to 35 km, and one key speed session per week. Requires a comfortable 10K base before starting.</p><p>Peak week hits 70 km. Plan includes a 3-week taper.</p>',
+			'excerpt'    => 'Structured 16-week marathon plan targeting a sub-4 finish with 5 sessions per week.',
+			'meta'       => [
+				'_runpace_duration_weeks'    => 16,
+				'_runpace_peak_weekly_km'    => 70,
+				'_runpace_sessions_per_week' => 5,
+				'_runpace_level_label'       => 'Intermediate',
+				'_runpace_goal_label'        => 'Marathon',
+				'_runpace_is_free'           => true,
+				'_runpace_download_url'      => '',
+			],
+			'difficulty' => 'Intermediate',
+			'goal'       => 'Marathon',
+		],
+		[
+			'title'      => 'Advanced Ultra Trail – 24 Week Plan',
+			'content'    => '<p>An elite-level 24-week programme for experienced runners targeting ultra-distance trail races (50 km–100 km). Includes back-to-back long run weekends, vertical gain progression, race-specific nutrition strategies, and a detailed 4-week taper.</p><p>Requires 80+ km/week base. Strength and mobility sessions included.</p>',
+			'excerpt'    => '24-week ultra trail plan for experienced runners targeting 50–100 km events.',
+			'meta'       => [
+				'_runpace_duration_weeks'    => 24,
+				'_runpace_peak_weekly_km'    => 130,
+				'_runpace_sessions_per_week' => 7,
+				'_runpace_level_label'       => 'Advanced',
+				'_runpace_goal_label'        => 'Ultra',
+				'_runpace_is_free'           => false,
+				'_runpace_download_url'      => '',
+			],
+			'difficulty' => 'Advanced',
+			'goal'       => 'Ultra',
+		],
+		[
+			'title'      => 'Half Marathon PB – 12 Week Plan',
+			'content'    => '<p>A 12-week plan designed to help runners with a solid half marathon base shave time off their personal best. Alternating threshold runs, race-pace intervals, and long runs up to 22 km keep the training varied and progressive.</p>',
+			'excerpt'    => '12-week plan for half marathon runners chasing a personal best. 4 sessions per week.',
+			'meta'       => [
+				'_runpace_duration_weeks'    => 12,
+				'_runpace_peak_weekly_km'    => 55,
+				'_runpace_sessions_per_week' => 4,
+				'_runpace_level_label'       => 'Intermediate',
+				'_runpace_goal_label'        => 'Half marathon',
+				'_runpace_is_free'           => true,
+				'_runpace_download_url'      => '',
+			],
+			'difficulty' => 'Intermediate',
+			'goal'       => 'Half marathon',
+		],
+	];
+}
+
+/**
+ * Insert sample training plans (skips any with matching title).
  */
 function runpace_seed_training_plans(): void {
 
-	$plans = [
-		[
-			'title'        => 'Couch to 5K – 8 Week Plan',
-			'level'        => 'Beginner',
-			'goal'         => '5K',
-			'weeks'        => 8,
-			'sessions'     => 3,
-			'peak_km'      => 20,
-			'is_free'      => true,
-			'excerpt'      => 'Go from zero to 5K in just 8 weeks. Walk/run intervals make this accessible to complete beginners.',
-		],
-		[
-			'title'        => 'Half Marathon 12-Week Plan',
-			'level'        => 'Intermediate',
-			'goal'         => 'Half marathon',
-			'weeks'        => 12,
-			'sessions'     => 4,
-			'peak_km'      => 55,
-			'is_free'      => true,
-			'excerpt'      => 'Build your base and run your first (or fastest) half marathon with this structured 12-week plan.',
-		],
-		[
-			'title'        => 'Marathon 16-Week Advanced Plan',
-			'level'        => 'Advanced',
-			'goal'         => 'Marathon',
-			'weeks'        => 16,
-			'sessions'     => 6,
-			'peak_km'      => 90,
-			'is_free'      => false,
-			'excerpt'      => 'High-volume marathon prep with speed work, long runs, and race-pace training for sub-3:30 athletes.',
-		],
-		[
-			'title'        => '10K Beginner 6-Week Plan',
-			'level'        => 'Beginner',
-			'goal'         => '10K',
-			'weeks'        => 6,
-			'sessions'     => 3,
-			'peak_km'      => 30,
-			'is_free'      => true,
-			'excerpt'      => 'A simple 6-week plan to complete your first 10K. Run three times per week and cross the finish line feeling strong.',
-		],
-	];
+	foreach ( runpace_sample_training_plans() as $data ) {
 
-	foreach ( $plans as $data ) {
-		$existing = get_page_by_title( $data['title'], OBJECT, 'training-plan' ); // phpcs:ignore WordPress.WP.DeprecatedFunctions
+		$existing = get_page_by_title( $data['title'], OBJECT, 'training-plan' );
 		if ( $existing ) {
 			continue;
 		}
@@ -283,33 +317,75 @@ function runpace_seed_training_plans(): void {
 				'post_type'    => 'training-plan',
 				'post_status'  => 'publish',
 				'post_title'   => $data['title'],
+				'post_content' => $data['content'],
 				'post_excerpt' => $data['excerpt'],
-				'post_content' => sprintf(
-					'<!-- wp:paragraph --><p>%s</p><!-- /wp:paragraph -->',
-					esc_html( $data['excerpt'] )
-				),
-			]
+			],
+			true
 		);
 
-		if ( is_wp_error( $post_id ) || ! $post_id ) {
+		if ( is_wp_error( $post_id ) ) {
 			continue;
 		}
 
-		update_post_meta( $post_id, '_runpace_duration_weeks',    $data['weeks'] );
-		update_post_meta( $post_id, '_runpace_sessions_per_week', $data['sessions'] );
-		update_post_meta( $post_id, '_runpace_peak_weekly_km',    $data['peak_km'] );
-		update_post_meta( $post_id, '_runpace_level_label',       $data['level'] );
-		update_post_meta( $post_id, '_runpace_goal_label',        $data['goal'] );
-		update_post_meta( $post_id, '_runpace_is_free',           $data['is_free'] );
-
-		$diff_term = get_term_by( 'name', $data['level'], 'runpace_difficulty' );
-		if ( $diff_term ) {
-			wp_set_post_terms( $post_id, [ $diff_term->term_id ], 'runpace_difficulty' );
+		foreach ( $data['meta'] as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
 		}
 
-		$goal_term = get_term_by( 'name', $data['goal'], 'runpace_goal' );
-		if ( $goal_term ) {
-			wp_set_post_terms( $post_id, [ $goal_term->term_id ], 'runpace_goal' );
+		if ( ! empty( $data['difficulty'] ) ) {
+			wp_set_object_terms( $post_id, $data['difficulty'], 'runpace_difficulty' );
+		}
+
+		if ( ! empty( $data['goal'] ) ) {
+			wp_set_object_terms( $post_id, $data['goal'], 'runpace_goal' );
 		}
 	}
+}
+
+// ─── Blog Post ─────────────────────────────────────────────────────────────────
+
+/**
+ * Insert a sample blog post about marathon training.
+ */
+function runpace_seed_blog_post(): void {
+
+	$existing = get_page_by_title( 'How to Pick Your First Marathon', OBJECT, 'post' );
+	if ( $existing ) {
+		return;
+	}
+
+	wp_insert_post(
+		[
+			'post_type'    => 'post',
+			'post_status'  => 'publish',
+			'post_title'   => 'How to Pick Your First Marathon',
+			'post_excerpt' => 'With hundreds of marathons worldwide, choosing your first can be overwhelming. Here\'s a practical guide to finding the race that\'s right for you.',
+			'post_content' => '<!-- wp:paragraph -->
+<p>Running your first marathon is a life-changing experience, but with thousands of races worldwide, choosing the right one can feel overwhelming. Distance, climate, elevation profile, travel logistics, and crowd support all matter — and the ideal race depends entirely on your goals.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Start with the basics</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Before scrolling through race listings, answer these questions: Is this a bucket-list destination race, or do you want the convenience of a local event? Do you have at least 16 weeks to train from today? And crucially — what is your goal? Just finishing, or chasing a specific time?</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Flat or scenic?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Fast, flat courses like Berlin or Valencia are ideal if you\'re chasing a personal best. More scenic routes — think the UTMB or Coastal Trail races — trade speed for breathtaking landscapes and a different kind of satisfaction.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Allow enough training time</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Most beginner marathon plans require 16–20 weeks. Book your race so that you can start training with a solid base — ideally comfortable with 30–40 km per week before the plan begins. Rushing into a marathon undertrained is the number one cause of DNFs and injury.</p>
+<!-- /wp:paragraph -->',
+		]
+	);
 }
